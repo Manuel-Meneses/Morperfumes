@@ -1,0 +1,193 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Identidad Mor Perfumes - Modo Claro (Base Crema) */
+  --background: #f6f4ed; /* Crema Suave */
+  --foreground: #141f36; /* Azul Marino Profundo */
+  
+  --card: #f6f4ed;
+  --card-foreground: #141f36;
+  
+  --popover: #f6f4ed;
+  --popover-foreground: #141f36;
+  
+  --primary: #141f36; /* Botones principales en Azul */
+  --primary-foreground: #f6f4ed; /* Texto de botones en Crema */
+  
+  --secondary: #e6e2d3; /* Un crema un poco más oscuro para contrastes */
+  --secondary-foreground: #141f36;
+  
+  --muted: #e6e2d3;
+  --muted-foreground: #4a5d4e; /* Verde palmera seco para textos secundarios */
+  
+  --accent: #c0a062; /* Oro Viejo para hovers y detalles */
+  --accent-foreground: #141f36;
+  
+  --destructive: #991b1b;
+  --destructive-foreground: #f6f4ed;
+  
+  --border: #141f3633; /* Borde sutil: Azul Marino al 20% de opacidad */
+  --input: #141f3633;
+  --ring: #141f36;
+  
+  /* Radios en 0 para bordes rectos y clásicos */
+  --radius: 0rem; 
+  
+  /* Sidebar adaptado a la paleta */
+  --sidebar: #f6f4ed;
+  --sidebar-foreground: #141f36;
+  --sidebar-primary: #141f36;
+  --sidebar-primary-foreground: #f6f4ed;
+  --sidebar-accent: #e6e2d3;
+  --sidebar-accent-foreground: #141f36;
+  --sidebar-border: #141f3633;
+  --sidebar-ring: #141f36;
+}
+
+.dark {
+  /* Identidad Mor Perfumes - Modo Oscuro (Base Azul Marino) */
+  --background: #141f36;
+  --foreground: #f6f4ed;
+  
+  --card: #141f36;
+  --card-foreground: #f6f4ed;
+  
+  --popover: #141f36;
+  --popover-foreground: #f6f4ed;
+  
+  --primary: #c0a062; /* Botones en Oro Viejo para que destaquen */
+  --primary-foreground: #141f36;
+  
+  --secondary: #1f2d4a; /* Azul un tono más claro */
+  --secondary-foreground: #f6f4ed;
+  
+  --muted: #1f2d4a;
+  --muted-foreground: #a3a8b5;
+  
+  --accent: #c0a062;
+  --accent-foreground: #141f36;
+  
+  --destructive: #7f1d1d;
+  --destructive-foreground: #f6f4ed;
+  
+  --border: #f6f4ed33; /* Crema transparente para bordes */
+  --input: #f6f4ed33;
+  --ring: #c0a062;
+  
+  --sidebar: #141f36;
+  --sidebar-foreground: #f6f4ed;
+  --sidebar-primary: #c0a062;
+  --sidebar-primary-foreground: #141f36;
+  --sidebar-accent: #1f2d4a;
+  --sidebar-accent-foreground: #f6f4ed;
+  --sidebar-border: #f6f4ed33;
+  --sidebar-ring: #c0a062;
+}
+
+@theme inline {
+  /* Vinculamos las nuevas fuentes al sistema de Tailwind */
+  --font-sans: var(--font-cuerpo), sans-serif;
+  --font-serif: var(--font-cormorant), serif;
+  
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Animaciones (Se mantienen tal cual las tenías) */
+@layer utilities {
+  @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes marquee-infinite {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+      transform: translateX(-4px);
+    }
+    20%,
+    40%,
+    60%,
+    80% {
+      transform: translateX(4px);
+    }
+  }
+
+  .animate-marquee {
+    display: inline-block;
+    animation: marquee 20s linear infinite;
+  }
+
+  .animate-marquee-infinite {
+    display: inline-flex;
+    animation: marquee-infinite 30s linear infinite;
+    will-change: transform;
+  }
+
+  .animate-shake {
+    animation: shake 0.5s ease-in-out;
+  }
+}
