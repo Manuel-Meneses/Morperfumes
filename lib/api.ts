@@ -7,12 +7,14 @@ export interface Product {
   image: string
   images: string[]
   category: string
+  webCategory?: string  // ACÁ GUARDAMOS LA "CATEGORÍA WEB" (Para filtrar)
   notes: string
   description: string
   details: string[]
   sizes: string[]
-  sizePrices?: Record<string, number> // NUEVO: Diccionario mágico de precios por tamaño
+  sizePrices?: Record<string, number> // Diccionario mágico de precios por tamaño
   availability: "encargo" | "stock"
+  isFeatured?: boolean
 }
 
 const SHEET_ID_ENCARGO = "1NLo24Av4lUAuFKbNL0s0NMKIg6bWFg7uRQGdHXOdIxg"
@@ -96,7 +98,8 @@ async function fetchEncargoSheet(url: string, category: string): Promise<Product
                 price: price,
                 image: imageStr,
                 images: [imageStr],
-                category: category,
+                category: category, // Ej: "Árabes" o "Diseñador" (Lo que ve el cliente)
+                webCategory: "sellados", // SOLUCIÓN: Todos los de este Excel van forzados a la pestaña "Sellados"
                 notes: fraseCorta,
                 availability: "encargo",
                 description: descPersonal,
@@ -137,18 +140,15 @@ async function fetchStockSheet(url: string): Promise<Product[]> {
               const p5 = Number(row["Precio 5ml"]?.toString().replace(/[^0-9.-]+/g,"")) || 0
               const p10 = Number(row["Precio 10ml"]?.toString().replace(/[^0-9.-]+/g,"")) || 0
 
-              // Si no usaron las nuevas columnas, intentamos leer la vieja "Precio"
               const precioBase = p3 || Number(row["Precio"]?.toString().replace(/[^0-9.-]+/g,"")) || 0
 
               let activeSizes: string[] = []
               let sizePrices: Record<string, number> = {}
 
-              // Solo agregamos los tamaños que tienen precio en el Excel
               if(p3 > 0) { activeSizes.push("3ml"); sizePrices["3ml"] = p3; }
               if(p5 > 0) { activeSizes.push("5ml"); sizePrices["5ml"] = p5; }
               if(p10 > 0) { activeSizes.push("10ml"); sizePrices["10ml"] = p10; }
 
-              // Fallback por si todavía no cargaron los precios en el Excel
               if (activeSizes.length === 0) {
                 activeSizes = ["3ml", "5ml", "10ml"]
                 sizePrices = { "3ml": precioBase, "5ml": precioBase, "10ml": precioBase }
@@ -160,8 +160,8 @@ async function fetchStockSheet(url: string): Promise<Product[]> {
                 price: precioBase, 
                 image: imageStr,
                 images: [imageStr],
-                // AHORA LEE LA COLUMNA "Segmento" PARA LAS CATEGORÍAS (Árabes, Árabes Raros, etc)
-                category: row["Segmento"] || row["Categoría web"] || "Stock",
+                category: row["Segmento"] || "Decants", // SOLUCIÓN: Esto ve el cliente (Ej: "Árabe Raro")
+                webCategory: row["Categoría web"] || "decants", // SOLUCIÓN: Esto usa el filtro interno de pestañas
                 notes: row["Frase corta (debajo del nombre)"] || "",
                 availability: "stock",
                 description: row["Descripción personal"] || `Descubrí ${row["Nombre"]}.`,
@@ -176,7 +176,8 @@ async function fetchStockSheet(url: string): Promise<Product[]> {
                   row["Fondo"] ? `Notas de Fondo: ${row["Fondo"]}` : "",
                 ].filter(Boolean), 
                 sizes: activeSizes, 
-                sizePrices: sizePrices, // Mandamos el diccionario de precios
+                sizePrices: sizePrices, 
+                isFeatured: row["Destacado"]?.toString().trim().toUpperCase() === "SI",
               }
             })
           resolve(products)

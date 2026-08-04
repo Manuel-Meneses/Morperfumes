@@ -2,13 +2,35 @@ import { Header } from "@/components/header"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { getProducts } from "@/lib/api"
-import { Play, ShieldCheck, Truck, MessageSquare, ChevronDown, ArrowRight, MessageCircle } from "lucide-react"
+import { Play, ShieldCheck, Truck, MessageSquare, ChevronDown, ArrowRight, MessageCircle, Instagram } from "lucide-react"
 import Image from "next/image"
+
+async function getTikTokInfo(url: string) {
+  try {
+    // Viajamos a la API pública de TikTok
+    const response = await fetch(`https://www.tiktok.com/oembed?url=${url}`, { 
+      next: { revalidate: 86400 } // Guarda la foto en caché por 24hs para que tu web cargue rapidísimo
+    })
+    const data = await response.json()
+    return {
+      title: data.title,
+      image: data.thumbnail_url, // ¡Acá está la portada automática!
+    }
+  } catch (error) {
+    return null
+  }
+}
 
 export default async function Home() {
   const allProducts = await getProducts()
   
-  const perfumesDestacados = allProducts.slice(0, 3) 
+  // LOGICA SELECCIÓN DEL MES: Busca los que el cliente marcó con "SI" en el Excel
+  let perfumesDestacados = allProducts.filter(p => (p as any).isFeatured === true)
+  // Fallback: Si el cliente todavía no puso ningún "SI", mostramos 4 al azar para que no se rompa la página
+  if (perfumesDestacados.length === 0) {
+    perfumesDestacados = allProducts.slice(0, 4) 
+  }
+
   const perfumesArabes = allProducts.filter(p => p.category.includes("Árabes")).slice(0, 5)
   const perfumesDisenador = allProducts.filter(p => p.category.includes("Diseñador")).slice(0, 5)
 
@@ -21,15 +43,28 @@ export default async function Home() {
 
   // ======================================================================
   // CONFIGURACIÓN DE TIKTOKS Y REELS
-  // Guardá las portadas de los videos en: public/reels/portada-1.jpg, etc.
-  // Y reemplazá el "link" por la URL del video real de León e Indio.
   // ======================================================================
-  const socialVideos = [
-    { id: 1, platform: "tiktok", title: "Los 3 mejores árabes para invierno", views: "12K", image: "/reels/portada-1.jpg", link: "https://tiktok.com" },
-    { id: 2, platform: "instagram", title: "Unboxing: Club de Nuit Precieux", views: "8.5K", image: "/reels/portada-2.jpg", link: "https://instagram.com" },
-    { id: 3, platform: "tiktok", title: "¿Cómo aplicarte perfume correctamente?", views: "25K", image: "/reels/portada-3.jpg", link: "https://tiktok.com" },
-    { id: 4, platform: "instagram", title: "Diseñador vs Árabe: La batalla final", views: "15K", image: "/reels/portada-4.jpg", link: "https://instagram.com" },
+const linksDeTikTok = [
+    "https://www.tiktok.com/@morperfumes1/video/7669205385038810375", // Reemplazá por los tuyos
+    "https://www.tiktok.com/@morperfumes1/video/7649524647414861063",
+    "https://www.tiktok.com/@morperfumes1/video/7654379079579274503",
+    "https://www.tiktok.com/@morperfumes1/video/7650292333883280647"
   ]
+
+  // Magia: Convertimos esos links en tarjetas de video completas automáticamente
+  const socialVideos = await Promise.all(
+    linksDeTikTok.map(async (link, index) => {
+      const data = await getTikTokInfo(link)
+      return {
+        id: index + 1,
+        platform: "tiktok",
+        title: data?.title || "Reseña exclusiva",
+        views: "Ver reseña", // Como la API no da las vistas exactas, ponemos este texto invitador
+        image: data?.image || "/placeholder.svg", // Portada automática
+        link: link
+      }
+    })
+  )
 
   const brands = [
     { name: "Lattafa", logo: "/logos/lattafa.svg" },
@@ -40,19 +75,18 @@ export default async function Home() {
     { name: "Al Haramain", logo: "/logos/haramain.svg" }
   ]
 
-  // PREGUNTAS FRECUENTES
   const faqs = [
     {
       q: "¿Los perfumes son originales?",
-      a: "Todos los perfumes son originales, tanto los que usamos para rellenar los decants como los que vendemos sellados. Todo comprobable por el código de batch (si tenés duda, te paso video del frasco)."
+      a: "Todos los perfumes son originales, tanto los que usamos para rellenar los decants como los que vendemos sellados. Todo comprobable por el código de batch."
     },
     {
       q: "¿Se arruina si lo pasan de un frasco a otro?",
-      a: "No. Fraccionamos con jeringa directo del frasco original, sin pasar por spray, así evitamos que el líquido se exponga de más al aire. Usamos frascos de vidrio y los llenamos casi al tope. Es el mismo perfume del frasco grande, en formato chico. Como cualquier perfume, guardalo lejos de la luz y el calor, y usalo dentro de los primeros meses para disfrutarlo en su mejor punto."
+      a: "No. Fraccionamos con jeringa directo del frasco original, sin pasar por spray, así evitamos que el líquido se exponga de más al aire. Usamos frascos de vidrio y los llenamos casi al tope. Es el mismo perfume del frasco grande, en formato chico."
     },
     {
       q: "Envíos y demora",
-      a: "Hacemos envíos a todo el país por Correo Argentino / PAQ.AR. Dentro de la provincia de Córdoba, por motomensajería o coordinando un punto de encuentro.<br/><br/>Siempre buscamos despachar lo antes posible tu pedido para que lo tengas disponible. Te confirmo el precio del envío por WhatsApp según tu ubicación y modo de envío (sucursal o domicilio). <strong>Envío gratis en decants a partir de $100.000.</strong><br/><br/>• <strong>Córdoba:</strong> mismo día o a coordinar entre ambas partes.<br/>• <strong>Resto del país:</strong> de 3 a 7 días hábiles."
+      a: "Hacemos envíos a todo el país por Correo Argentino / PAQ.AR. Dentro de la provincia de Córdoba, por motomensajería o coordinando un punto de encuentro.<br/><br/><strong>Envío gratis en decants a partir de $100.000.</strong><br/>• <strong>Córdoba:</strong> mismo día o a coordinar.<br/>• <strong>Resto del país:</strong> de 3 a 7 días hábiles."
     },
     {
       q: "¿Puedo conseguir un perfume que no está en el catálogo?",
@@ -60,7 +94,7 @@ export default async function Home() {
     },
     {
       q: "¿Cómo funciona el encargo?",
-      a: "Nos decís qué perfume querés y te damos el tiempo aproximado (entre 1 y 2 semanas). Pagás una seña del 50% para confirmar el pedido, y cuando nos llega abonás el resto y te lo enviamos por Correo Argentino o coordinamos entrega en Córdoba."
+      a: "Nos decís qué perfume querés y te damos el tiempo aproximado (entre 1 y 2 semanas). Pagás una seña del 50% para confirmar el pedido, y cuando nos llega abonás el resto y te lo enviamos."
     },
     {
       q: "¿Qué son los árabes raros?",
@@ -68,7 +102,7 @@ export default async function Home() {
     },
     {
       q: "Tamaños de decants",
-      a: "<strong>2,5 ml:</strong> la medida justa para explorar un nuevo aroma y decidir si ir por la botella completa.<br/><strong>5 ml:</strong> podés usarlo seguido.<br/><strong>10 ml:</strong> es como tener una versión mini de la botella completa, para cuando ya te gusta mucho el perfume y lo querés tener sí o sí a mano."
+      a: "<strong>2,5 ml:</strong> la medida justa para explorar un nuevo aroma.<br/><strong>5 ml:</strong> podés usarlo seguido.<br/><strong>10 ml:</strong> es como tener una versión mini de la botella completa."
     },
     {
       q: "No sé cuál elegir",
@@ -165,13 +199,23 @@ export default async function Home() {
         </div>
       </div>
 
-      {/* =======================================================
-          4. SECCIÓN DESTACADOS
-          ======================================================= */}
-      <section className="relative py-24 sm:py-32 bg-[#141f36] border-b border-[#c0a062]/20">
+      <section className="relative py-24 sm:py-32 border-b border-[#c0a062]/20 overflow-hidden">
+        
+        {/* FONDO DE IMAGEN PARA SELECCIÓN DEL MES */}
+        <div className="absolute inset-0 w-full h-full z-0">
+          <Image
+            src="/fondo_destacados.jpg" // <--- Guardá tu imagen en la carpeta public con este nombre
+            alt="Fondo Selección del Mes"
+            fill
+            className="object-cover opacity-20 grayscale" // Grayscale y baja opacidad para que sea elegante
+          />
+          {/* El gradiente azul marino para que se integre con el resto de la página */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#141f36] via-[#141f36]/10 to-[#141f36]/90" />
+        </div>
+
         <div className="relative z-10 w-full">
           <div className="container mx-auto px-4 sm:px-6 text-center mb-10 sm:mb-16">
-            <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-medium text-[#f6f4ed] mb-4 tracking-wide">
+            <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-medium text-[#f6f4ed] mb-4 tracking-wide drop-shadow-md">
               Selección del<span className="italic text-[#c0a062]"> Mes</span>
             </h2>
             <div className="flex items-center justify-center gap-4 mt-8 mb-6">
@@ -189,10 +233,10 @@ export default async function Home() {
             {perfumesDestacados.map((product, index) => (
               <div 
                 key={product.id} 
-                className="group relative flex flex-col p-6 sm:p-8 bg-[#1a2640] border border-[#f6f4ed]/20 hover:border-[#c0a062] transition-all duration-500 shrink-0 w-[85vw] max-w-[300px] sm:max-w-[340px] snap-center hover:-translate-y-2 mt-2 shadow-xl"
+                className="group relative flex flex-col p-6 sm:p-8 bg-[#1a2640]/90 backdrop-blur-sm border border-[#f6f4ed]/10 hover:border-[#c0a062] transition-all duration-500 shrink-0 w-[85vw] max-w-[300px] sm:max-w-[340px] snap-center hover:-translate-y-2 mt-2 shadow-2xl"
               >
                 <div className="absolute top-0 left-0 bg-[#c0a062] text-[#141f36] px-3.5 py-1.5 text-xs font-bold uppercase tracking-widest z-20 rounded-br-lg shadow-md">
-                  Top {index + 1}
+                  Recomendado
                 </div>
 
                 <Link href={`/product/${product.id}`} className="relative w-full aspect-[4/5] mb-6 mt-4 block cursor-pointer">
@@ -232,8 +276,9 @@ export default async function Home() {
         </div>
       </section>
 
+
       {/* =======================================================
-          5. ÁRABES RAROS (Línea de piso para no cortar botones)
+          5. ÁRABES RAROS
           ======================================================= */}
       <section className="bg-[#141f36] border-b border-[#c0a062]/20 py-24 overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 mb-12 text-center">
@@ -242,17 +287,15 @@ export default async function Home() {
             Árabes Raros
           </h2>
           <Button variant="link" asChild className="text-[#c0a062] hover:text-[#f6f4ed] text-base group">
-            <Link href="/shop?category=arabes-raros" className="flex items-center gap-2">
+            <Link href="/shop?category=decants" className="flex items-center gap-2">
               Explorar Colección <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
             </Link>
           </Button>
         </div>
 
         <div className="relative w-full pt-4">
-          {/* LÍNEA DE PISO: Ahora está completamente abajo, actuando como podio */}
           <div className="absolute bottom-[20px] sm:bottom-[24px] left-0 w-full h-12 border-t-2 border-[#c0a062]/30 bg-gradient-to-b from-[#c0a062]/10 to-transparent z-0" />
 
-          {/* Carrusel elevado con pb generoso para separar los botones de la línea */}
           <div className="flex overflow-x-auto snap-x snap-mandatory gap-8 sm:gap-12 px-6 sm:px-12 md:px-24 w-full [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-[#141f36] [&::-webkit-scrollbar-thumb]:bg-[#c0a062]/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#c0a062] pb-14 sm:pb-16 relative z-10">
             {perfumesArabes.map(product => (
               <div key={product.id} className="snap-center shrink-0 w-48 sm:w-60 flex flex-col items-center group pt-6">
@@ -284,7 +327,7 @@ export default async function Home() {
             ))}
             
             <div className="snap-center shrink-0 w-36 sm:w-44 flex flex-col items-center justify-center pt-6 pb-14 sm:pb-16">
-               <Link href="/shop?category=arabes-raros" className="flex flex-col items-center justify-center h-60 sm:h-76 w-full border border-[#c0a062]/30 rounded-t-full hover:bg-[#c0a062]/10 transition-colors group mb-6">
+               <Link href="/shop?category=decants" className="flex flex-col items-center justify-center h-60 sm:h-76 w-full border border-[#c0a062]/30 rounded-t-full hover:bg-[#c0a062]/10 transition-colors group mb-6">
                   <span className="text-[#c0a062] text-xs uppercase tracking-widest font-bold mb-2">Ver Todo</span>
                   <ArrowRight className="h-5 w-5 text-[#c0a062] transform group-hover:translate-x-2 transition-transform" />
                </Link>
@@ -294,7 +337,7 @@ export default async function Home() {
       </section>
 
       {/* =======================================================
-          6. DISEÑADOR (Línea de piso para no cortar botones)
+          6. DISEÑADOR
           ======================================================= */}
       <section className="bg-[#f6f4ed] border-y border-[#141f36]/10 py-24 overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 mb-12 text-center">
@@ -303,7 +346,7 @@ export default async function Home() {
             Catálogo de Diseñador
           </h2>
           <Button variant="link" asChild className="text-[#141f36] hover:text-[#c0a062] text-base group">
-            <Link href="/shop?category=disenador" className="flex items-center gap-2">
+            <Link href="/shop?category=sellados" className="flex items-center gap-2">
               Ver Clásicos <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
             </Link>
           </Button>
@@ -343,7 +386,7 @@ export default async function Home() {
             ))}
 
             <div className="snap-center shrink-0 w-36 sm:w-44 flex flex-col items-center justify-center pt-6 pb-14 sm:pb-16">
-               <Link href="/shop?category=disenador" className="flex flex-col items-center justify-center h-60 sm:h-76 w-full border border-[#141f36]/30 rounded-t-full hover:bg-[#141f36]/10 transition-colors group mb-6">
+               <Link href="/shop?category=sellados" className="flex flex-col items-center justify-center h-60 sm:h-76 w-full border border-[#141f36]/30 rounded-t-full hover:bg-[#141f36]/10 transition-colors group mb-6">
                   <span className="text-[#141f36] text-xs uppercase tracking-widest font-bold mb-2">Ver Todo</span>
                   <ArrowRight className="h-5 w-5 text-[#141f36] transform group-hover:translate-x-2 transition-transform" />
                </Link>
@@ -353,62 +396,66 @@ export default async function Home() {
       </section>
 
       {/* =======================================================
-          7. COMUNIDAD MOR (Con Reels)
+          7. COMUNIDAD MOR (NUEVO DISEÑO BENTO GRID / MASONRY)
           ======================================================= */}
-      <section className="py-20 sm:py-28 bg-[#e6e2d3]/50">
+      <section className="py-24 sm:py-32 bg-[#e6e2d3]/30 overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-[#c0a062] font-bold tracking-[0.2em] uppercase text-xs mb-3 block">Comunidad Mor</span>
-            <h2 className="font-serif text-4xl sm:text-5xl font-medium text-[#141f36] mb-6">
-              La Experiencia en Vivo
-            </h2>
-            <div className="h-px w-16 bg-[#c0a062] mx-auto mb-6" />
+          
+          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+            <div className="max-w-2xl">
+              <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-medium text-[#141f36] leading-tight">
+                La perfumería, <br/> contada en primera persona.
+              </h2>
+            </div>
+            <a href="https://instagram.com/morperfumes_" target="_blank" rel="noreferrer" className="shrink-0 pb-2 border-b border-[#141f36] text-[#141f36] font-medium hover:text-[#c0a062] hover:border-[#c0a062] transition-colors flex items-center gap-2">
+              Seguinos en redes <ArrowRight className="w-4 h-4" />
+            </a>
           </div>
 
+          {/* Grilla Asimétrica Tipo Pantallas de Celular */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-            {socialVideos.map((video) => (
+            {socialVideos.map((video, index) => (
               <a 
                 key={video.id} 
                 href={video.link}
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="group relative aspect-[9/16] bg-[#141f36] overflow-hidden cursor-pointer block shadow-lg hover:shadow-2xl transition-all duration-300"
+                className={`group relative aspect-[9/16] bg-[#141f36] overflow-hidden cursor-pointer block shadow-xl hover:shadow-2xl hover:shadow-[#c0a062]/20 transition-all duration-500 rounded-[2rem] sm:rounded-[2.5rem] border-[6px] border-white/40 ${index % 2 !== 0 ? 'md:mt-12' : ''}`}
               >
-                <Image src={video.image} alt={video.title} fill className="object-cover opacity-85 group-hover:opacity-100 transition-opacity duration-700 group-hover:scale-105" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#141f36] via-[#141f36]/30 to-transparent opacity-90" />
+                <Image 
+                  src={video.image} 
+                  alt={video.title} 
+                  fill 
+                  className="object-cover opacity-90 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110" 
+                />
                 
-                <div className="absolute top-4 left-4 z-30">
-                  <div className="flex items-center gap-2 bg-white text-[#141f36] px-3 py-1.5 text-xs font-bold tracking-widest uppercase shadow-md">
-                    <Image src={`/${video.platform}-logo.png`} alt={video.platform} width={14} height={14} className="object-contain" />
-                    {video.platform}
-                  </div>
-                </div>
+                {/* Único gradiente optimizado para oscurecer abajo y dejar ver la foto */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#141f36] via-[#141f36]/20 to-transparent opacity-90" />
                 
+                {/* Botón de Play Central */}
                 <div className="absolute inset-0 flex items-center justify-center z-20">
-                  <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center border border-white/60 group-hover:bg-[#c0a062] group-hover:border-[#c0a062] transition-colors duration-300 transform group-hover:scale-110">
-                    <Play className="h-6 w-6 text-white ml-1" fill="currentColor" />
+                  <div className="w-14 h-14 backdrop-blur-sm bg-white/10 rounded-full flex items-center justify-center border border-white/40 group-hover:bg-[#c0a062]/90 group-hover:border-[#c0a062] group-hover:shadow-[0_0_25px_rgba(192,160,98,0.5)] transition-all duration-500 transform group-hover:scale-110">
+                    <Play className="h-5 w-5 text-white ml-1" fill="currentColor" />
                   </div>
                 </div>
                 
-                <div className="absolute bottom-0 left-0 w-full p-6 z-20 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                  <div className="flex items-center gap-2 mb-2 text-[#c0a062] text-xs font-bold tracking-wider uppercase">
-                    <Play className="h-3 w-3 fill-current" />
-                    {video.views} vistas
-                  </div>
-                  <h3 className="text-white font-serif text-base sm:text-lg leading-snug line-clamp-2 drop-shadow-md">
+                {/* Título inferior limpio */}
+                <div className="absolute bottom-0 left-0 w-full p-5 sm:p-6 z-20 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+                  <h3 className="text-white font-serif text-base sm:text-lg leading-snug drop-shadow-md line-clamp-2">
                     {video.title}
                   </h3>
                 </div>
               </a>
             ))}
-          </div>
+            </div>
+          
         </div>
       </section> 
 
       {/* =======================================================
           8. PREGUNTAS FRECUENTES (FAQ)
           ======================================================= */}
-      <section className="bg-[#f6f4ed] border-t border-[#141f36]/10 py-24 sm:py-32">
+      <section id="faq" className="bg-[#f6f4ed] border-t border-[#141f36]/10 py-24 sm:py-32">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <span className="text-[#c0a062] font-bold tracking-[0.2em] uppercase text-xs mb-3 block">Guía del Cliente</span>
@@ -471,10 +518,10 @@ export default async function Home() {
                   <Link href="/shop" className="hover:text-[#c0a062] transition-colors">Catálogo Completo</Link>
                 </li>
                 <li className="transform transition-all duration-300 hover:-translate-x-2">
-                  <Link href="/shop?category=arabes-raros" className="hover:text-[#c0a062] transition-colors">Árabes Raros</Link>
+                  <Link href="/shop?category=decants" className="hover:text-[#c0a062] transition-colors">Decants</Link>
                 </li>
                 <li className="transform transition-all duration-300 hover:-translate-x-2">
-                  <Link href="/shop?category=disenador" className="hover:text-[#c0a062] transition-colors">Diseñador</Link>
+                  <Link href="/shop?category=sellados" className="hover:text-[#c0a062] transition-colors">Sellados</Link>
                 </li>
               </ul>
             </div>
@@ -497,7 +544,7 @@ export default async function Home() {
                   <a href="https://wa.me/5493516087006" className="hover:text-[#c0a062] transition-colors">Concierge WhatsApp</a>
                 </li>
                 <li className="transform transition-all duration-300 hover:translate-x-2">
-                  <Link href="/shop" className="hover:text-[#c0a062] transition-colors">Preguntas Frecuentes</Link>
+                  <Link href="/faq" className="hover:text-[#c0a062] transition-colors">Preguntas Frecuentes</Link>
                 </li>
               </ul>
             </div>
