@@ -142,12 +142,12 @@ function ShopContent() {
 
   const tabs = [
     { id: "sellados", label: "Sellados", subtitle: "Árabes & Diseñador" },
-    { id: "decants", label: "Decants", subtitle: "Árabes Raros & Fraccionados" },
+    { id: "decants", label: "Decants", subtitle: "Raros & Fraccionados" }, // Acorté el texto para móvil
   ]
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f6f4ed] flex flex-col">
+      <div className="min-h-screen bg-[#f6f4ed] flex flex-col overflow-x-hidden">
         <Header />
         <div className="flex-1 flex items-center justify-center">
           <div className="w-12 h-12 border-4 border-[#c0a062] border-t-transparent rounded-full animate-spin"></div>
@@ -157,39 +157,41 @@ function ShopContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f6f4ed]">
+    // Agregamos overflow-x-hidden para matar el scroll horizontal
+    <div className="min-h-screen bg-[#f6f4ed] overflow-x-hidden">
       <Header />
-      <div className="container mx-auto px-4 md:px-6 py-8 md:py-16">
+      {/* Redujimos un poco el padding en móviles para ganar espacio */}
+      <div className="container mx-auto px-2 md:px-6 py-8 md:py-16 max-w-full">
         
         {/* Cabecera Principal */}
-        <div className="flex flex-col items-center text-center mb-10 md:mb-16">
-          <span className="text-[#c0a062] font-bold tracking-[0.2em] uppercase text-xs mb-4 block">La Colección</span>
-          <h1 className="font-serif text-4xl md:text-6xl font-medium text-[#141f36] mb-4">Catálogo de Alta Perfumería</h1>
-          <div className="w-16 h-[1px] bg-[#c0a062] mb-6"></div>
-          <p className="text-[#141f36]/70 font-serif italic text-base md:text-lg max-w-xl px-2">
+        <div className="flex flex-col items-center text-center mb-8 md:mb-16">
+          <span className="text-[#c0a062] font-bold tracking-[0.2em] uppercase text-xs mb-3 md:mb-4 block">La Colección</span>
+          <h1 className="font-serif text-3xl sm:text-4xl md:text-6xl font-medium text-[#141f36] mb-3 md:mb-4 leading-tight">Catálogo de Alta Perfumería</h1>
+          <div className="w-12 md:w-16 h-[1px] bg-[#c0a062] mb-4 md:mb-6"></div>
+          <p className="text-[#141f36]/70 font-serif italic text-sm md:text-lg max-w-xl px-4">
             Curaduría exclusiva. Encontrá la fragancia que definirá tu presencia.
           </p>
         </div>
 
-        {/* Pestañas de Navegación (Optimizadas para Móvil) */}
-        <div className="flex justify-center mb-10 md:mb-12">
-          <div className="flex w-full md:w-auto flex-row justify-between md:justify-center gap-2 md:gap-24 pb-4 border-b border-[#141f36]/10 px-2 md:px-4">
+        {/* Pestañas de Navegación (Super Optimizadas para Móvil) */}
+        <div className="flex justify-center mb-8 md:mb-12 w-full">
+          <div className="flex w-full sm:w-auto flex-row justify-between md:justify-center gap-1 sm:gap-8 md:gap-24 pb-4 border-b border-[#141f36]/10 px-1 md:px-4">
             {tabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => handleCategoryChange(tab.id)}
-                className={`flex-1 md:flex-none group flex flex-col items-center relative transition-all duration-300 ${
+                className={`flex-1 sm:flex-none group flex flex-col items-center relative transition-all duration-300 ${
                   categoryParam === tab.id ? "opacity-100" : "opacity-40 hover:opacity-70"
                 }`}
               >
                 <span className={`font-serif text-xl sm:text-2xl md:text-4xl mb-1 md:mb-2 ${categoryParam === tab.id ? "text-[#141f36]" : "text-[#141f36]"}`}>
                   {tab.label}
                 </span>
-                <span className={`text-[8px] sm:text-[9px] md:text-xs uppercase tracking-[0.1em] md:tracking-[0.2em] font-bold text-center ${categoryParam === tab.id ? "text-[#c0a062]" : "text-[#141f36]"}`}>
+                <span className={`text-[7px] sm:text-[9px] md:text-xs uppercase tracking-[0.05em] sm:tracking-[0.1em] md:tracking-[0.2em] font-bold text-center ${categoryParam === tab.id ? "text-[#c0a062]" : "text-[#141f36]"}`}>
                   {tab.subtitle}
                 </span>
                 {categoryParam === tab.id && (
-                  <span className="absolute bottom-[-17px] left-1/2 -translate-x-1/2 w-full max-w-[80px] md:max-w-[120px] h-[2px] bg-[#c0a062]"></span>
+                  <span className="absolute bottom-[-17px] left-1/2 -translate-x-1/2 w-full max-w-[60px] md:max-w-[120px] h-[2px] bg-[#c0a062]"></span>
                 )}
               </button>
             ))}
@@ -203,24 +205,24 @@ function ShopContent() {
           </p>
           <button 
             onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-            className="flex items-center gap-2 text-[10px] md:text-xs font-bold uppercase tracking-widest text-[#141f36] hover:text-[#c0a062] transition-colors"
+            className="flex items-center gap-1.5 md:gap-2 text-[10px] md:text-xs font-bold uppercase tracking-widest text-[#141f36] hover:text-[#c0a062] transition-colors"
           >
             <Filter className="w-3.5 h-3.5 md:w-4 md:h-4" />
             {showAdvancedFilters ? "Ocultar" : "Filtrar"}
           </button>
         </div>
 
-        {/* CONTENEDOR DE FILTROS (Responsive 100%) */}
+        {/* CONTENEDOR DE FILTROS */}
         {showAdvancedFilters && (
           <div className="bg-white border border-[#141f36]/5 p-4 md:p-6 mb-8 md:mb-10 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
             
-            {/* 1. SWITCH DE PRIORIDAD (Apilado en móvil) */}
+            {/* 1. SWITCH DE PRIORIDAD */}
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 md:mb-8 pb-6 md:pb-8 border-b border-[#141f36]/10 gap-4">
-              <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-[#141f36]">Configurar Escala</span>
+              <span className="text-[9px] md:text-xs font-bold uppercase tracking-widest text-[#141f36]">Configurar Escala</span>
               <div className="flex flex-row w-full md:w-auto p-1 bg-[#f6f4ed] border border-[#141f36]/10 rounded-sm">
                 <button 
                   onClick={() => { setDesignerFirst(false); setPriceFilter("all"); }}
-                  className={`flex-1 md:flex-none px-2 md:px-6 py-3 md:py-2.5 text-[9px] sm:text-[10px] md:text-xs font-bold uppercase tracking-[0.1em] md:tracking-widest transition-all text-center ${
+                  className={`flex-1 md:flex-none px-2 md:px-6 py-3 md:py-2.5 text-[8px] sm:text-[10px] md:text-xs font-bold uppercase tracking-[0.05em] md:tracking-widest transition-all text-center ${
                     !designerFirst ? 'bg-[#141f36] text-[#f6f4ed] shadow-md' : 'text-[#141f36]/50 hover:text-[#141f36]'
                   }`}
                 >
@@ -228,7 +230,7 @@ function ShopContent() {
                 </button>
                 <button 
                   onClick={() => { setDesignerFirst(true); setPriceFilter("all"); }}
-                  className={`flex-1 md:flex-none px-2 md:px-6 py-3 md:py-2.5 text-[9px] sm:text-[10px] md:text-xs font-bold uppercase tracking-[0.1em] md:tracking-widest transition-all text-center ${
+                  className={`flex-1 md:flex-none px-2 md:px-6 py-3 md:py-2.5 text-[8px] sm:text-[10px] md:text-xs font-bold uppercase tracking-[0.05em] md:tracking-widest transition-all text-center ${
                     designerFirst ? 'bg-[#141f36] text-[#f6f4ed] shadow-md' : 'text-[#141f36]/50 hover:text-[#141f36]'
                   }`}
                 >
@@ -237,43 +239,43 @@ function ShopContent() {
               </div>
             </div>
 
-            {/* 2. FILTROS DE BÚSQUEDA, GÉNERO Y PRECIO (Grid de 1 columna en móvil, 3 en PC) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+            {/* 2. FILTROS DE BÚSQUEDA, GÉNERO Y PRECIO */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6">
               
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#141f36]/40" />
+                <Search className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 h-3.5 w-3.5 md:h-4 md:w-4 text-[#141f36]/40" />
                 <input 
                   type="text" 
                   placeholder="Buscar esencia..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3.5 md:py-3 bg-transparent border border-[#141f36]/10 md:border-t-0 md:border-l-0 md:border-r-0 md:border-b md:border-[#141f36]/20 focus:outline-none focus:border-[#c0a062] transition-all font-serif text-sm md:text-base text-[#141f36] placeholder:text-[#141f36]/40 rounded-sm md:rounded-none"
+                  className="w-full pl-10 md:pl-12 pr-4 py-3 md:py-3 bg-transparent border border-[#141f36]/10 md:border-t-0 md:border-l-0 md:border-r-0 md:border-b md:border-[#141f36]/20 focus:outline-none focus:border-[#c0a062] transition-all font-serif text-sm md:text-base text-[#141f36] placeholder:text-[#141f36]/40 rounded-sm md:rounded-none"
                 />
               </div>
 
               <div className="relative">
-                <Users className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#141f36]/40" />
+                <Users className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 h-3.5 w-3.5 md:h-4 md:w-4 text-[#141f36]/40" />
                 <select 
                   value={genderFilter}
                   onChange={(e) => setGenderFilter(e.target.value)}
-                  className="w-full pl-12 pr-10 py-3.5 md:py-3 bg-transparent border border-[#141f36]/10 md:border-t-0 md:border-l-0 md:border-r-0 md:border-b md:border-[#141f36]/20 appearance-none focus:outline-none focus:border-[#c0a062] transition-all font-serif text-sm md:text-base text-[#141f36] cursor-pointer rounded-sm md:rounded-none"
+                  className="w-full pl-10 md:pl-12 pr-8 md:pr-10 py-3 md:py-3 bg-transparent border border-[#141f36]/10 md:border-t-0 md:border-l-0 md:border-r-0 md:border-b md:border-[#141f36]/20 appearance-none focus:outline-none focus:border-[#c0a062] transition-all font-serif text-sm md:text-base text-[#141f36] cursor-pointer rounded-sm md:rounded-none"
                 >
                   <option value="all">Todos los Géneros</option>
                   <option value="masculino">Masculino</option>
                   <option value="femenino">Femenino</option>
                   <option value="unisex">Unisex</option>
                 </select>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                  <ChevronDown className="h-4 w-4 text-[#141f36]/40" />
+                <div className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <ChevronDown className="h-3.5 w-3.5 md:h-4 md:w-4 text-[#141f36]/40" />
                 </div>
               </div>
 
               <div className="relative">
-                <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#141f36]/40" />
+                <DollarSign className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 h-3.5 w-3.5 md:h-4 md:w-4 text-[#141f36]/40" />
                 <select 
                   value={priceFilter}
                   onChange={(e) => setPriceFilter(e.target.value)}
-                  className="w-full pl-12 pr-10 py-3.5 md:py-3 bg-transparent border border-[#141f36]/10 md:border-t-0 md:border-l-0 md:border-r-0 md:border-b md:border-[#141f36]/20 appearance-none focus:outline-none focus:border-[#c0a062] transition-all font-serif text-sm md:text-base text-[#141f36] cursor-pointer rounded-sm md:rounded-none"
+                  className="w-full pl-10 md:pl-12 pr-8 md:pr-10 py-3 md:py-3 bg-transparent border border-[#141f36]/10 md:border-t-0 md:border-l-0 md:border-r-0 md:border-b md:border-[#141f36]/20 appearance-none focus:outline-none focus:border-[#c0a062] transition-all font-serif text-sm md:text-base text-[#141f36] cursor-pointer rounded-sm md:rounded-none"
                 >
                   <option value="all">Cualquier Precio</option>
                   {designerFirst ? (
@@ -290,8 +292,8 @@ function ShopContent() {
                     </>
                   )}
                 </select>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                  <ChevronDown className="h-4 w-4 text-[#141f36]/40" />
+                <div className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <ChevronDown className="h-3.5 w-3.5 md:h-4 md:w-4 text-[#141f36]/40" />
                 </div>
               </div>
 
@@ -299,7 +301,10 @@ function ShopContent() {
           </div>
         )}
 
-        <ProductGrid products={currentProducts} layout="grid" />
+        {/* CONTENEDOR DE GRILLA SEGURO */}
+        <div className="w-full overflow-hidden px-1">
+          <ProductGrid products={currentProducts} layout="grid" />
+        </div>
 
         {/* Paginación */}
         {totalPages > 1 && (
@@ -338,8 +343,9 @@ function ShopContent() {
           </div>
         )}
 
+        {/* Estado Vacío */}
         {sortedProducts.length === 0 && (
-          <div className="text-center py-16 md:py-24 px-4 bg-white/50 border border-[#141f36]/5 mt-8">
+          <div className="text-center py-16 md:py-24 px-4 bg-white/50 border border-[#141f36]/5 mt-8 mx-2">
             <SlidersHorizontal className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-4 md:mb-6 text-[#141f36]/20" />
             <p className="font-serif text-lg md:text-xl text-[#141f36]/70 mb-4">No encontramos fragancias con esos criterios.</p>
             <Button 
