@@ -43,6 +43,10 @@ export function Header() {
             <Link href="/about" className="text-lg font-serif text-[#141f36] hover:text-[#c0a062] transition-colors duration-300">
               Nuestra Historia
             </Link>
+            {/* NUEVO ENLACE DESKTOP: Preguntas Frecuentes */}
+            <Link href="/faq" className="text-lg font-serif text-[#141f36] hover:text-[#c0a062] transition-colors duration-300">
+              Preguntas Frecuentes
+            </Link>
           </nav>
 
           {/* Actions - Íconos en Azul Marino */}
@@ -111,6 +115,14 @@ export function Header() {
                       className="text-xl font-serif py-5 px-4 border-b border-[#141f36]/10 hover:bg-[#141f36]/5 hover:text-[#c0a062] transition-colors"
                     >
                       Nuestra Historia
+                    </Link>
+                    {/* NUEVO ENLACE MOBILE: Preguntas Frecuentes */}
+                    <Link
+                      href="/faq"
+                      onClick={() => setOpen(false)}
+                      className="text-xl font-serif py-5 px-4 border-b border-[#141f36]/10 hover:bg-[#141f36]/5 hover:text-[#c0a062] transition-colors"
+                    >
+                      Preguntas Frecuentes
                     </Link>
                     
                     {/* 4. Carrito en Mobile: Cierra el menú hamburguesa y abre el carrito */}

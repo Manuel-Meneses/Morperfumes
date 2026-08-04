@@ -20,7 +20,7 @@ export function ProductCard({ product }: { product: Product }) {
   const numeroWA = "5493516087006"
   
   // Armamos el mensaje específico para este producto
-  const mensajeWA = `¡Hola León e Indio! Me interesa el perfume ${product.name}.\n\nEspecificaciones:\n- Precio: $${product.price}\n- Notas: ${product.notes}\n\n¿Tienen stock disponible para encargar?`
+  const mensajeWA = `¡Hola León e Indio! Me interesa el perfume ${product.name}.\n\nEspecificaciones:\n- Precio: $${product.price.toLocaleString("es-AR")}\n- Notas: ${product.notes}\n\n¿Tienen stock disponible para encargar?`
   const linkWA = `https://wa.me/${numeroWA}?text=${encodeURIComponent(mensajeWA)}`
   
   // Link para el rating (busca el nombre del perfume en Fragrantica)
@@ -28,12 +28,13 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <div className="group relative border border-border bg-card rounded-sm overflow-hidden flex flex-col h-full hover:shadow-md transition-shadow duration-300">
-      <Link href={`/product/${product.id}`} className="block relative aspect-[3/4] bg-[#f6f4ed] p-4 flex items-center justify-center overflow-hidden">
+      <Link href={`/product/${product.id}`} className="block relative aspect-[3/4] bg-[#f6f4ed] flex items-center justify-center overflow-hidden">
         <Image
           src={product.image || "/placeholder.svg"}
           alt={product.name}
           fill
-          className="object-cover transition-transform duration-700 group-hover:scale-105 p-4"
+          // ACÁ ESTÁ LA MAGIA: object-contain + drop-shadow + p-6 para que respire
+          className="object-contain transition-transform duration-700 group-hover:scale-105 p-6 drop-shadow-[0_15px_15px_rgba(0,0,0,0.12)]"
         />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500" />
       </Link>

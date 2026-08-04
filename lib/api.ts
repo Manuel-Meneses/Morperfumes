@@ -15,7 +15,7 @@ export interface Product {
   availability: "encargo" | "stock"
 }
 
-const SHEET_ID_ENCARGO = "1bOxz0dHTMupF2ahiKqQ_ByvMpaiAfukFe374tLGx4uc"
+const SHEET_ID_ENCARGO = "1NLo24Av4lUAuFKbNL0s0NMKIg6bWFg7uRQGdHXOdIxg"
 const SHEET_ID_STOCK = "1JJqt7YyPoH3ppHzQ0AT1RihAl7imgo06drwigzw0ta0"
 
 const URL_ARABES_ENCARGO = `https://docs.google.com/spreadsheets/d/${SHEET_ID_ENCARGO}/gviz/tq?tqx=out:csv&sheet=Árabes`
