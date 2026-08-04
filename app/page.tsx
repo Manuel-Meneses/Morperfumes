@@ -31,7 +31,7 @@ export default async function Home() {
     perfumesDestacados = allProducts.slice(0, 4) 
   }
 
-  const perfumesArabes = allProducts.filter(p => p.category.includes("Árabes")).slice(0, 5)
+  const perfumesArabesRaros = allProducts.filter(p => p.category.toLowerCase().includes("raro")).slice(0, 5)
   const perfumesDisenador = allProducts.filter(p => p.category.includes("Diseñador")).slice(0, 5)
 
   const numeroWA = "5493516087006"
@@ -297,7 +297,7 @@ const linksDeTikTok = [
           <div className="absolute bottom-[20px] sm:bottom-[24px] left-0 w-full h-12 border-t-2 border-[#c0a062]/30 bg-gradient-to-b from-[#c0a062]/10 to-transparent z-0" />
 
           <div className="flex overflow-x-auto snap-x snap-mandatory gap-8 sm:gap-12 px-6 sm:px-12 md:px-24 w-full [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-[#141f36] [&::-webkit-scrollbar-thumb]:bg-[#c0a062]/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#c0a062] pb-14 sm:pb-16 relative z-10">
-            {perfumesArabes.map(product => (
+            {perfumesArabesRaros.map(product => (
               <div key={product.id} className="snap-center shrink-0 w-48 sm:w-60 flex flex-col items-center group pt-6">
                 
                 <Link href={`/product/${product.id}`} className="relative h-60 sm:h-76 w-full flex items-end justify-center mb-6 transform transition-transform duration-500 group-hover:-translate-y-4 cursor-pointer">
