@@ -504,55 +504,68 @@ const linksDeTikTok = [
 
       {/* =======================================================
           10. FOOTER
+{/* =======================================================
+          10. FOOTER (Optimizado para Móvil)
           ======================================================= */}
       <footer className="bg-[#141f36] text-[#f6f4ed] relative overflow-hidden border-t border-[#c0a062]/20">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[radial-gradient(ellipse_at_top,_rgba(192,160,98,0.04)_0%,_transparent_70%)] pointer-events-none" />
+        
+        {/* Gradiente de fondo adaptativo */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] md:w-[800px] h-[300px] md:h-[400px] bg-[radial-gradient(ellipse_at_top,_rgba(192,160,98,0.05)_0%,_transparent_70%)] pointer-events-none" />
 
-        <div className="container mx-auto px-4 sm:px-6 pt-24 pb-12">
-          <div className="flex flex-col md:flex-row justify-center items-start md:gap-16 lg:gap-24 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 pt-16 md:pt-24 pb-8 md:pb-12">
+          <div className="flex flex-col md:flex-row justify-center items-center md:items-start md:gap-16 lg:gap-24 relative z-10">
 
-            <div className="flex-1 w-full text-center md:text-right mt-12 md:mt-24 order-2 md:order-1">
-              <h4 className="font-medium mb-8 text-[#c0a062] tracking-[0.3em] uppercase text-xs">Colecciones</h4>
-              <ul className="space-y-5 text-base text-[#f6f4ed]/80 font-serif">
-                <li className="transform transition-all duration-300 hover:-translate-x-2">
-                  <Link href="/shop" className="hover:text-[#c0a062] transition-colors">Catálogo Completo</Link>
+            {/* COLUMNA 1: Colecciones */}
+            <div className="flex-1 w-full text-center md:text-right mt-10 md:mt-24 order-2 md:order-1">
+              <h4 className="font-medium mb-6 md:mb-8 text-[#c0a062] tracking-[0.3em] uppercase text-[10px] md:text-xs">Colecciones</h4>
+              <ul className="space-y-4 md:space-y-5 text-sm md:text-base text-[#f6f4ed]/80 font-serif">
+                <li className="transform transition-all duration-300 md:hover:-translate-x-2">
+                  <Link href="/shop" className="hover:text-[#c0a062] transition-colors block py-1 md:py-0">Catálogo Completo</Link>
                 </li>
-                <li className="transform transition-all duration-300 hover:-translate-x-2">
-                  <Link href="/shop?category=decants" className="hover:text-[#c0a062] transition-colors">Decants</Link>
+                <li className="transform transition-all duration-300 md:hover:-translate-x-2">
+                  <Link href="/shop?category=decants" className="hover:text-[#c0a062] transition-colors block py-1 md:py-0">Decants</Link>
                 </li>
-                <li className="transform transition-all duration-300 hover:-translate-x-2">
-                  <Link href="/shop?category=sellados" className="hover:text-[#c0a062] transition-colors">Sellados</Link>
+                <li className="transform transition-all duration-300 md:hover:-translate-x-2">
+                  <Link href="/shop?category=sellados" className="hover:text-[#c0a062] transition-colors block py-1 md:py-0">Sellados</Link>
                 </li>
               </ul>
             </div>
 
+            {/* COLUMNA 2: Logo y Marca (Centro) */}
             <div className="flex flex-col items-center order-1 md:order-2 shrink-0">
-              <div className="w-12 h-12 rounded-full border border-[#c0a062]/40 flex items-center justify-center mb-6">
-                <div className="w-2.5 h-2.5 rotate-45 bg-[#c0a062]" />
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-[#c0a062]/40 flex items-center justify-center mb-4 md:mb-6">
+                <div className="w-2 h-2 md:w-2.5 md:h-2.5 rotate-45 bg-[#c0a062]" />
               </div>
-              <h3 className="font-serif text-3xl font-medium tracking-[0.2em] text-[#c0a062] mb-3">MOR</h3>
-              <p className="text-base text-[#f6f4ed]/70 text-center max-w-[220px] font-serif italic mb-6">
+              <h3 className="font-serif text-2xl md:text-3xl font-medium tracking-[0.2em] text-[#c0a062] mb-2 md:mb-3">MOR</h3>
+              <p className="text-sm md:text-base text-[#f6f4ed]/70 text-center max-w-[200px] md:max-w-[220px] font-serif italic mb-2 md:mb-6">
                 El arte de la alta perfumería.
               </p>
-              <div className="w-px h-32 sm:h-48 bg-gradient-to-b from-[#c0a062]/60 via-[#c0a062]/20 to-transparent" />
+              {/* MAGIA RESPONSIVE: Línea vertical en PC, línea horizontal sutil en móvil */}
+              <div className="hidden md:block w-px h-32 sm:h-48 bg-gradient-to-b from-[#c0a062]/60 via-[#c0a062]/20 to-transparent" />
+              <div className="md:hidden w-24 h-px mt-6 bg-gradient-to-r from-transparent via-[#c0a062]/40 to-transparent" />
             </div>
 
-            <div className="flex-1 w-full text-center md:text-left mt-12 md:mt-24 order-3 md:order-3">
-              <h4 className="font-medium mb-8 text-[#c0a062] tracking-[0.3em] uppercase text-xs">Servicio</h4>
-              <ul className="space-y-5 text-base text-[#f6f4ed]/80 font-serif">
-                <li className="transform transition-all duration-300 hover:translate-x-2">
-                  <a href="https://wa.me/5493516087006" className="hover:text-[#c0a062] transition-colors">Concierge WhatsApp</a>
+            {/* COLUMNA 3: Servicio */}
+            <div className="flex-1 w-full text-center md:text-left mt-10 md:mt-24 order-3 md:order-3">
+              <h4 className="font-medium mb-6 md:mb-8 text-[#c0a062] tracking-[0.3em] uppercase text-[10px] md:text-xs">Servicio</h4>
+              <ul className="space-y-4 md:space-y-5 text-sm md:text-base text-[#f6f4ed]/80 font-serif">
+                <li className="transform transition-all duration-300 md:hover:translate-x-2">
+                  <a href="https://wa.me/5493516087006" target="_blank" rel="noopener noreferrer" className="hover:text-[#c0a062] transition-colors block py-1 md:py-0">Concierge WhatsApp</a>
                 </li>
-                <li className="transform transition-all duration-300 hover:translate-x-2">
-                  <Link href="/faq" className="hover:text-[#c0a062] transition-colors">Preguntas Frecuentes</Link>
+                <li className="transform transition-all duration-300 md:hover:translate-x-2">
+                  <Link href="/faq" className="hover:text-[#c0a062] transition-colors block py-1 md:py-0">Preguntas Frecuentes</Link>
+                </li>
+                 <li className="transform transition-all duration-300 md:hover:translate-x-2">
+                  <Link href="/reviews" className="hover:text-[#c0a062] transition-colors block py-1 md:py-0">Reseñas y Comunidad</Link>
                 </li>
               </ul>
             </div>
 
           </div>
 
-          <div className="mt-16 text-xs text-[#f6f4ed]/50 flex flex-col items-center gap-3 uppercase tracking-widest relative z-10">
-            <div className="w-full max-w-lg h-px bg-gradient-to-r from-transparent via-[#c0a062]/40 to-transparent mb-6" />
+          {/* Copyright */}
+          <div className="mt-12 md:mt-16 text-[10px] md:text-xs text-[#f6f4ed]/50 flex flex-col items-center gap-2 md:gap-3 uppercase tracking-widest relative z-10">
+            <div className="w-full max-w-[200px] md:max-w-lg h-px bg-gradient-to-r from-transparent via-[#c0a062]/40 to-transparent mb-4 md:mb-6" />
             <p className="hover:text-[#c0a062] transition-colors">&copy; 2026 MOR PERFUMES.</p>
             <p className="hover:text-[#c0a062] transition-colors">Diseño & Código de Autor.</p>
           </div>

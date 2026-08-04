@@ -76,7 +76,6 @@ function ShopContent() {
     // 🛡️ FILTRO DE GÉNERO BLINDADO
     let matchesGender = true
     if (genderFilter !== "all") {
-      // Unimos todo el texto y forzamos espacios a los costados para buscar palabras exactas
       const searchArea = (" " + nameNorm + " " + detailsNorm + " ").replace(/\s+/g, " ")
       
       if (genderFilter === "masculino") {
@@ -162,78 +161,85 @@ function ShopContent() {
       <Header />
       <div className="container mx-auto px-4 md:px-6 py-8 md:py-16">
         
-        <div className="flex flex-col items-center text-center mb-12 md:mb-16">
+        {/* Cabecera Principal */}
+        <div className="flex flex-col items-center text-center mb-10 md:mb-16">
           <span className="text-[#c0a062] font-bold tracking-[0.2em] uppercase text-xs mb-4 block">La Colección</span>
           <h1 className="font-serif text-4xl md:text-6xl font-medium text-[#141f36] mb-4">Catálogo de Alta Perfumería</h1>
           <div className="w-16 h-[1px] bg-[#c0a062] mb-6"></div>
-          <p className="text-[#141f36]/70 font-serif italic text-lg max-w-xl">
+          <p className="text-[#141f36]/70 font-serif italic text-base md:text-lg max-w-xl px-2">
             Curaduría exclusiva. Encontrá la fragancia que definirá tu presencia.
           </p>
         </div>
 
-        <div className="flex justify-center mb-12">
-          <div className="inline-flex w-full md:w-auto flex-row justify-center gap-8 md:gap-24 pb-4 border-b border-[#141f36]/10 px-4">
+        {/* Pestañas de Navegación (Optimizadas para Móvil) */}
+        <div className="flex justify-center mb-10 md:mb-12">
+          <div className="flex w-full md:w-auto flex-row justify-between md:justify-center gap-2 md:gap-24 pb-4 border-b border-[#141f36]/10 px-2 md:px-4">
             {tabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => handleCategoryChange(tab.id)}
-                className={`group flex flex-col items-center relative transition-all duration-300 ${
+                className={`flex-1 md:flex-none group flex flex-col items-center relative transition-all duration-300 ${
                   categoryParam === tab.id ? "opacity-100" : "opacity-40 hover:opacity-70"
                 }`}
               >
-                <span className={`font-serif text-2xl md:text-4xl mb-2 ${categoryParam === tab.id ? "text-[#141f36]" : "text-[#141f36]"}`}>
+                <span className={`font-serif text-xl sm:text-2xl md:text-4xl mb-1 md:mb-2 ${categoryParam === tab.id ? "text-[#141f36]" : "text-[#141f36]"}`}>
                   {tab.label}
                 </span>
-                <span className={`text-[9px] md:text-xs uppercase tracking-[0.2em] font-bold ${categoryParam === tab.id ? "text-[#c0a062]" : "text-[#141f36]"}`}>
+                <span className={`text-[8px] sm:text-[9px] md:text-xs uppercase tracking-[0.1em] md:tracking-[0.2em] font-bold text-center ${categoryParam === tab.id ? "text-[#c0a062]" : "text-[#141f36]"}`}>
                   {tab.subtitle}
                 </span>
                 {categoryParam === tab.id && (
-                  <span className="absolute bottom-[-17px] left-1/2 -translate-x-1/2 w-full max-w-[120px] h-[2px] bg-[#c0a062]"></span>
+                  <span className="absolute bottom-[-17px] left-1/2 -translate-x-1/2 w-full max-w-[80px] md:max-w-[120px] h-[2px] bg-[#c0a062]"></span>
                 )}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="flex justify-between items-center mb-8 border-b border-[#141f36]/5 pb-4">
-          <p className="text-xs font-bold uppercase tracking-widest text-[#141f36]/50">
+        {/* Barra contadora y botón de filtros */}
+        <div className="flex justify-between items-center mb-6 md:mb-8 border-b border-[#141f36]/5 pb-4 px-2">
+          <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-[#141f36]/50">
             {sortedProducts.length} Fragancias
           </p>
           <button 
             onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-            className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#141f36] hover:text-[#c0a062] transition-colors"
+            className="flex items-center gap-2 text-[10px] md:text-xs font-bold uppercase tracking-widest text-[#141f36] hover:text-[#c0a062] transition-colors"
           >
-            <Filter className="w-4 h-4" />
-            {showAdvancedFilters ? "Ocultar Filtros" : "Mostrar Filtros"}
+            <Filter className="w-3.5 h-3.5 md:w-4 md:h-4" />
+            {showAdvancedFilters ? "Ocultar" : "Filtrar"}
           </button>
         </div>
 
+        {/* CONTENEDOR DE FILTROS (Responsive 100%) */}
         {showAdvancedFilters && (
-          <div className="bg-white border border-[#141f36]/5 p-6 mb-10 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="bg-white border border-[#141f36]/5 p-4 md:p-6 mb-8 md:mb-10 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
             
-            <div className="flex flex-col sm:flex-row items-center justify-between mb-8 pb-8 border-b border-[#141f36]/10 gap-4">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#141f36]">Ordenar & Configurar Escala de Precios</span>
-              <div className="flex p-1 bg-[#f6f4ed] border border-[#141f36]/10 rounded-sm">
+            {/* 1. SWITCH DE PRIORIDAD (Apilado en móvil) */}
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 md:mb-8 pb-6 md:pb-8 border-b border-[#141f36]/10 gap-4">
+              <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-[#141f36]">Configurar Escala</span>
+              <div className="flex flex-row w-full md:w-auto p-1 bg-[#f6f4ed] border border-[#141f36]/10 rounded-sm">
                 <button 
                   onClick={() => { setDesignerFirst(false); setPriceFilter("all"); }}
-                  className={`px-6 py-2.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all ${
+                  className={`flex-1 md:flex-none px-2 md:px-6 py-3 md:py-2.5 text-[9px] sm:text-[10px] md:text-xs font-bold uppercase tracking-[0.1em] md:tracking-widest transition-all text-center ${
                     !designerFirst ? 'bg-[#141f36] text-[#f6f4ed] shadow-md' : 'text-[#141f36]/50 hover:text-[#141f36]'
                   }`}
                 >
-                  Árabes Primero
+                  Árabes
                 </button>
                 <button 
                   onClick={() => { setDesignerFirst(true); setPriceFilter("all"); }}
-                  className={`px-6 py-2.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all ${
+                  className={`flex-1 md:flex-none px-2 md:px-6 py-3 md:py-2.5 text-[9px] sm:text-[10px] md:text-xs font-bold uppercase tracking-[0.1em] md:tracking-widest transition-all text-center ${
                     designerFirst ? 'bg-[#141f36] text-[#f6f4ed] shadow-md' : 'text-[#141f36]/50 hover:text-[#141f36]'
                   }`}
                 >
-                  Diseñador Primero
+                  Diseñador
                 </button>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* 2. FILTROS DE BÚSQUEDA, GÉNERO Y PRECIO (Grid de 1 columna en móvil, 3 en PC) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+              
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#141f36]/40" />
                 <input 
@@ -241,7 +247,7 @@ function ShopContent() {
                   placeholder="Buscar esencia..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-transparent border-b border-[#141f36]/20 focus:outline-none focus:border-[#c0a062] transition-all font-serif text-base text-[#141f36] placeholder:text-[#141f36]/40"
+                  className="w-full pl-12 pr-4 py-3.5 md:py-3 bg-transparent border border-[#141f36]/10 md:border-t-0 md:border-l-0 md:border-r-0 md:border-b md:border-[#141f36]/20 focus:outline-none focus:border-[#c0a062] transition-all font-serif text-sm md:text-base text-[#141f36] placeholder:text-[#141f36]/40 rounded-sm md:rounded-none"
                 />
               </div>
 
@@ -250,7 +256,7 @@ function ShopContent() {
                 <select 
                   value={genderFilter}
                   onChange={(e) => setGenderFilter(e.target.value)}
-                  className="w-full pl-12 pr-10 py-3 bg-transparent border-b border-[#141f36]/20 appearance-none focus:outline-none focus:border-[#c0a062] transition-all font-serif text-base text-[#141f36] cursor-pointer"
+                  className="w-full pl-12 pr-10 py-3.5 md:py-3 bg-transparent border border-[#141f36]/10 md:border-t-0 md:border-l-0 md:border-r-0 md:border-b md:border-[#141f36]/20 appearance-none focus:outline-none focus:border-[#c0a062] transition-all font-serif text-sm md:text-base text-[#141f36] cursor-pointer rounded-sm md:rounded-none"
                 >
                   <option value="all">Todos los Géneros</option>
                   <option value="masculino">Masculino</option>
@@ -267,7 +273,7 @@ function ShopContent() {
                 <select 
                   value={priceFilter}
                   onChange={(e) => setPriceFilter(e.target.value)}
-                  className="w-full pl-12 pr-10 py-3 bg-transparent border-b border-[#141f36]/20 appearance-none focus:outline-none focus:border-[#c0a062] transition-all font-serif text-base text-[#141f36] cursor-pointer"
+                  className="w-full pl-12 pr-10 py-3.5 md:py-3 bg-transparent border border-[#141f36]/10 md:border-t-0 md:border-l-0 md:border-r-0 md:border-b md:border-[#141f36]/20 appearance-none focus:outline-none focus:border-[#c0a062] transition-all font-serif text-sm md:text-base text-[#141f36] cursor-pointer rounded-sm md:rounded-none"
                 >
                   <option value="all">Cualquier Precio</option>
                   {designerFirst ? (
@@ -288,28 +294,30 @@ function ShopContent() {
                   <ChevronDown className="h-4 w-4 text-[#141f36]/40" />
                 </div>
               </div>
+
             </div>
           </div>
         )}
 
         <ProductGrid products={currentProducts} layout="grid" />
 
+        {/* Paginación */}
         {totalPages > 1 && (
-          <div className="flex flex-wrap justify-center items-center gap-4 mt-16 mb-8">
+          <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4 mt-12 md:mt-16 mb-8">
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="p-3 border border-[#141f36]/10 text-[#141f36] disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#c0a062] hover:text-[#c0a062] transition-all rounded-full"
+              className="p-2 md:p-3 border border-[#141f36]/10 text-[#141f36] disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#c0a062] hover:text-[#c0a062] transition-all rounded-full"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             
-            <div className="flex gap-2">
+            <div className="flex gap-1 md:gap-2">
               {Array.from({ length: totalPages }).map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setCurrentPage(i + 1)}
-                  className={`w-10 h-10 font-serif text-sm transition-all rounded-full ${
+                  className={`w-8 h-8 md:w-10 md:h-10 font-serif text-xs md:text-sm transition-all rounded-full ${
                     currentPage === i + 1 
                       ? "bg-[#141f36] text-[#f6f4ed]" 
                       : "bg-transparent text-[#141f36]/60 hover:text-[#141f36]"
@@ -323,7 +331,7 @@ function ShopContent() {
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="p-3 border border-[#141f36]/10 text-[#141f36] disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#c0a062] hover:text-[#c0a062] transition-all rounded-full"
+              className="p-2 md:p-3 border border-[#141f36]/10 text-[#141f36] disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#c0a062] hover:text-[#c0a062] transition-all rounded-full"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -331,9 +339,9 @@ function ShopContent() {
         )}
 
         {sortedProducts.length === 0 && (
-          <div className="text-center py-24 px-4 bg-white/50 border border-[#141f36]/5 mt-8">
-            <SlidersHorizontal className="h-8 w-8 mx-auto mb-6 text-[#141f36]/20" />
-            <p className="font-serif text-xl text-[#141f36]/70 mb-4">No encontramos fragancias con esos criterios.</p>
+          <div className="text-center py-16 md:py-24 px-4 bg-white/50 border border-[#141f36]/5 mt-8">
+            <SlidersHorizontal className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-4 md:mb-6 text-[#141f36]/20" />
+            <p className="font-serif text-lg md:text-xl text-[#141f36]/70 mb-4">No encontramos fragancias con esos criterios.</p>
             <Button 
               variant="outline" 
               onClick={() => { 
