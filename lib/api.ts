@@ -84,10 +84,10 @@ async function fetchEncargoSheet(url: string, category: string): Promise<Product
                 }
               })
 
-              const idxDesc = findCol(["DESCRIPCION", "DESCRIPCIÓN"])
               const idxFrase = findCol(["FRASE", "FRASE CORTA"])
               const fraseCorta = (idxFrase !== -1 && row[idxFrase]) ? row[idxFrase].trim() : ""
-              const descPersonal = (idxDesc !== -1 && row[idxDesc]) ? row[idxDesc].trim() : `Descubrí la esencia de ${rawName}. Fragancia premium disponible por encargo.`
+              const idxDesc = findCol(["DESCRIPCION", "DESCRIPCIÓN", "DESCRIPTION"])
+             const descPersonal = (idxDesc !== -1 && row[idxDesc]) ? row[idxDesc].trim() : `Descubrí la esencia de ${rawName}. Fragancia premium disponible por encargo.`
               
               let price = 0
               if (idxPrecio !== -1 && row[idxPrecio]) price = Number(row[idxPrecio].replace(/[^0-9.-]+/g,"")) || 0
@@ -164,7 +164,7 @@ async function fetchStockSheet(url: string): Promise<Product[]> {
                 webCategory: row["Categoría web"] || "decants", // SOLUCIÓN: Esto usa el filtro interno de pestañas
                 notes: row["Frase corta (debajo del nombre)"] || "",
                 availability: "stock",
-                description: row["Descripción personal"] || `Descubrí ${row["Nombre"]}.`,
+                description: row["Descripcion"] || row["Descripción"] || `Descubrí la esencia de ${row["Nombre"]}.`,
                 details: [
                   row["Marca"] ? `Marca: ${row["Marca"]}` : "",
                   row["Segmento"] ? `Segmento: ${row["Segmento"]}` : "",
@@ -174,6 +174,7 @@ async function fetchStockSheet(url: string): Promise<Product[]> {
                   row["Salida"] ? `Notas de Salida: ${row["Salida"]}` : "",
                   row["Corazón"] ? `Notas de Corazón: ${row["Corazón"]}` : "",
                   row["Fondo"] ? `Notas de Fondo: ${row["Fondo"]}` : "",
+                  row["Genero"] ? `Género: ${row["Genero"]}` : "",
                 ].filter(Boolean), 
                 sizes: activeSizes, 
                 sizePrices: sizePrices, 

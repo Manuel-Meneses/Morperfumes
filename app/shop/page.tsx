@@ -6,7 +6,7 @@ import { Header } from "@/components/header"
 import { ProductGrid } from "@/components/product-grid"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { ArrowLeft, SlidersHorizontal, Search, DollarSign, ChevronDown, ChevronLeft, ChevronRight, Filter } from "lucide-react"
+import { ArrowLeft, SlidersHorizontal, Search, DollarSign, ChevronDown, ChevronLeft, ChevronRight, Filter, Users } from "lucide-react"
 import { getProducts, Product } from "@/lib/api"
 
 const ITEMS_PER_PAGE = 12
@@ -14,7 +14,6 @@ const ITEMS_PER_PAGE = 12
 function ShopContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  // La categoría por defecto es "sellados"
   const categoryParam = searchParams.get("category") || "sellados"
 
   const [allProducts, setAllProducts] = useState<Product[]>([])
@@ -22,7 +21,9 @@ function ShopContent() {
   
   const [searchQuery, setSearchQuery] = useState("")
   const [priceFilter, setPriceFilter] = useState("all")
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
+  const [genderFilter, setGenderFilter] = useState("all")
+  const [designerFirst, setDesignerFirst] = useState(false) 
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(true) 
   const [currentPage, setCurrentPage] = useState(1)
 
   useEffect(() => {
@@ -36,7 +37,7 @@ function ShopContent() {
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [categoryParam, searchQuery, priceFilter])
+  }, [categoryParam, searchQuery, priceFilter, genderFilter, designerFirst])
 
   const normalize = (str: string) => {
     if (!str) return ""
@@ -45,39 +46,23 @@ function ShopContent() {
 
   const query = categoryParam.toLowerCase()
 
-  // 1. FILTRADO EXACTO USANDO LA "CATEGORÍA WEB" DEL EXCEL
-  // 1. FILTRADO BLINDADO
+  // 1. FILTRADO
   const filteredProducts = allProducts.filter(p => {
-    // Leemos de todas las columnas posibles por las dudas (webCategory o categoriaWeb)
     const webCatNorm = normalize((p as any).webCategory || (p as any).categoriaWeb || "")
     const catNorm = normalize(p.category || "")
     const nameNorm = normalize(p.name || "")
+    const detailsNorm = normalize((p.details || []).join(" "))
     
+    // Categoría (Sellados vs Decants)
     let matchesCategory = false
-    
-    // REGLA DE ORO PARA DECANTS / RAROS
-    // Es de la pestaña "Decants" si: 
-    // - La columna webCategory dice "decant"
-    // - O el segmento visual dice "decant" o "raro"
-    // - O el nombre del perfume incluye la palabra "decant"
     const isDecantTab = webCatNorm.includes("decant") || catNorm.includes("decant") || catNorm.includes("raro") || nameNorm.includes("decant")
-
-    // REGLA DE ORO PARA SELLADOS
-    // Es de la pestaña "Sellados" si:
-    // - La columna webCategory dice "sellado"
-    // - O SI NO ES un Decant/Raro (por descarte, los árabes y diseñadores limpios caen acá)
     const isSelladoTab = webCatNorm.includes("sellado") || !isDecantTab
     
-    // Aplicamos la regla según la pestaña en la que estemos
-    if (query === "sellados") {
-      matchesCategory = isSelladoTab
-    } else if (query === "decants") {
-      matchesCategory = isDecantTab
-    } else {
-      matchesCategory = true // Por si acaso
-    }
+    if (query === "sellados") matchesCategory = isSelladoTab
+    else if (query === "decants") matchesCategory = isDecantTab
+    else matchesCategory = true
 
-    // Filtro de Búsqueda
+    // Búsqueda por texto
     let matchesSearch = true
     if (searchQuery) {
       const searchNorm = normalize(searchQuery)
@@ -88,18 +73,66 @@ function ShopContent() {
         catNorm.includes(searchNorm)
     }
 
-    // Filtro de Precio
+    // 🛡️ FILTRO DE GÉNERO BLINDADO
+    let matchesGender = true
+    if (genderFilter !== "all") {
+      // Unimos todo el texto y forzamos espacios a los costados para buscar palabras exactas
+      const searchArea = (" " + nameNorm + " " + detailsNorm + " ").replace(/\s+/g, " ")
+      
+      if (genderFilter === "masculino") {
+        matchesGender = searchArea.includes(" genero: m ") || 
+                        searchArea.includes(" hombre ") || 
+                        searchArea.includes(" masculino ") || 
+                        searchArea.includes(" for men ") || 
+                        searchArea.includes(" pour homme ")
+      } else if (genderFilter === "femenino") {
+        matchesGender = searchArea.includes(" genero: f ") || 
+                        searchArea.includes(" mujer ") || 
+                        searchArea.includes(" femenino ") || 
+                        searchArea.includes(" for women ") || 
+                        searchArea.includes(" pour femme ")
+      } else if (genderFilter === "unisex") {
+        matchesGender = searchArea.includes(" genero: u ") || 
+                        searchArea.includes(" unisex ") || 
+                        searchArea.includes(" mixto ")
+      }
+    }
+
+    // Precio Dinámico (Depende del switch)
     let matchesPrice = true
-    if (priceFilter === "low") matchesPrice = p.price > 0 && p.price <= 20000
-    else if (priceFilter === "mid") matchesPrice = p.price > 20000 && p.price <= 50000
-    else if (priceFilter === "high") matchesPrice = p.price > 50000
+    if (designerFirst) {
+      if (priceFilter === "low") matchesPrice = p.price > 0 && p.price <= 150000
+      else if (priceFilter === "mid") matchesPrice = p.price > 150000 && p.price <= 230000
+      else if (priceFilter === "high") matchesPrice = p.price > 230000
+    } else {
+      if (priceFilter === "low") matchesPrice = p.price > 0 && p.price <= 60000
+      else if (priceFilter === "mid") matchesPrice = p.price > 60000 && p.price <= 90000
+      else if (priceFilter === "high") matchesPrice = p.price > 90000
+    }
 
-    return matchesCategory && matchesSearch && matchesPrice
-  }) 
+    return matchesCategory && matchesSearch && matchesGender && matchesPrice
+  })
 
-  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE)
+  // 2. ORDENAMIENTO (El Switch en acción)
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    const aCat = normalize(a.category || "")
+    const bCat = normalize(b.category || "")
+    
+    if (designerFirst) {
+      const aIsDes = aCat.includes("disenador") ? 1 : 0
+      const bIsDes = bCat.includes("disenador") ? 1 : 0
+      return bIsDes - aIsDes
+    } else {
+      const aIsArabe = aCat.includes("arabe") ? 1 : 0
+      const bIsArabe = bCat.includes("arabe") ? 1 : 0
+      return bIsArabe - aIsArabe
+    }
+  })
+
+  // 3. PAGINACIÓN
+  const totalPages = Math.ceil(sortedProducts.length / ITEMS_PER_PAGE)
   
-  const currentProducts = filteredProducts.slice(
+  const currentProducts = sortedProducts.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   )
@@ -145,9 +178,7 @@ function ShopContent() {
                 key={tab.id}
                 onClick={() => handleCategoryChange(tab.id)}
                 className={`group flex flex-col items-center relative transition-all duration-300 ${
-                  categoryParam === tab.id 
-                    ? "opacity-100" 
-                    : "opacity-40 hover:opacity-70"
+                  categoryParam === tab.id ? "opacity-100" : "opacity-40 hover:opacity-70"
                 }`}
               >
                 <span className={`font-serif text-2xl md:text-4xl mb-2 ${categoryParam === tab.id ? "text-[#141f36]" : "text-[#141f36]"}`}>
@@ -166,41 +197,92 @@ function ShopContent() {
 
         <div className="flex justify-between items-center mb-8 border-b border-[#141f36]/5 pb-4">
           <p className="text-xs font-bold uppercase tracking-widest text-[#141f36]/50">
-            {filteredProducts.length} Fragancias
+            {sortedProducts.length} Fragancias
           </p>
           <button 
             onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
             className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#141f36] hover:text-[#c0a062] transition-colors"
           >
             <Filter className="w-4 h-4" />
-            {showAdvancedFilters ? "Ocultar Filtros" : "Filtrar Selección"}
+            {showAdvancedFilters ? "Ocultar Filtros" : "Mostrar Filtros"}
           </button>
         </div>
 
         {showAdvancedFilters && (
           <div className="bg-white border border-[#141f36]/5 p-6 mb-10 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
-            <div className="flex flex-col md:flex-row gap-6">
-              <div className="relative flex-1">
+            
+            <div className="flex flex-col sm:flex-row items-center justify-between mb-8 pb-8 border-b border-[#141f36]/10 gap-4">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#141f36]">Ordenar & Configurar Escala de Precios</span>
+              <div className="flex p-1 bg-[#f6f4ed] border border-[#141f36]/10 rounded-sm">
+                <button 
+                  onClick={() => { setDesignerFirst(false); setPriceFilter("all"); }}
+                  className={`px-6 py-2.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all ${
+                    !designerFirst ? 'bg-[#141f36] text-[#f6f4ed] shadow-md' : 'text-[#141f36]/50 hover:text-[#141f36]'
+                  }`}
+                >
+                  Árabes Primero
+                </button>
+                <button 
+                  onClick={() => { setDesignerFirst(true); setPriceFilter("all"); }}
+                  className={`px-6 py-2.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all ${
+                    designerFirst ? 'bg-[#141f36] text-[#f6f4ed] shadow-md' : 'text-[#141f36]/50 hover:text-[#141f36]'
+                  }`}
+                >
+                  Diseñador Primero
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#141f36]/40" />
                 <input 
                   type="text" 
-                  placeholder="Buscar esencia, nota o nombre..." 
+                  placeholder="Buscar esencia..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-12 pr-4 py-3 bg-transparent border-b border-[#141f36]/20 focus:outline-none focus:border-[#c0a062] transition-all font-serif text-base text-[#141f36] placeholder:text-[#141f36]/40"
                 />
               </div>
 
-              <div className="relative w-full md:w-64">
+              <div className="relative">
+                <Users className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#141f36]/40" />
+                <select 
+                  value={genderFilter}
+                  onChange={(e) => setGenderFilter(e.target.value)}
+                  className="w-full pl-12 pr-10 py-3 bg-transparent border-b border-[#141f36]/20 appearance-none focus:outline-none focus:border-[#c0a062] transition-all font-serif text-base text-[#141f36] cursor-pointer"
+                >
+                  <option value="all">Todos los Géneros</option>
+                  <option value="masculino">Masculino</option>
+                  <option value="femenino">Femenino</option>
+                  <option value="unisex">Unisex</option>
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <ChevronDown className="h-4 w-4 text-[#141f36]/40" />
+                </div>
+              </div>
+
+              <div className="relative">
+                <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#141f36]/40" />
                 <select 
                   value={priceFilter}
                   onChange={(e) => setPriceFilter(e.target.value)}
-                  className="w-full pl-4 pr-10 py-3 bg-transparent border-b border-[#141f36]/20 appearance-none focus:outline-none focus:border-[#c0a062] transition-all font-serif text-base text-[#141f36] cursor-pointer"
+                  className="w-full pl-12 pr-10 py-3 bg-transparent border-b border-[#141f36]/20 appearance-none focus:outline-none focus:border-[#c0a062] transition-all font-serif text-base text-[#141f36] cursor-pointer"
                 >
-                  <option value="all">Rango de Precio</option>
-                  <option value="low">Hasta $20.000</option>
-                  <option value="mid">De $20.000 a $50.000</option>
-                  <option value="high">Más de $50.000</option>
+                  <option value="all">Cualquier Precio</option>
+                  {designerFirst ? (
+                    <>
+                      <option value="low">Menos de $150.000</option>
+                      <option value="mid">De $150.000 a $230.000</option>
+                      <option value="high">Más de $230.000</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="low">Hasta $60.000</option>
+                      <option value="mid">De $60.000 a $90.000</option>
+                      <option value="high">Más de $90.000</option>
+                    </>
+                  )}
                 </select>
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
                   <ChevronDown className="h-4 w-4 text-[#141f36]/40" />
@@ -248,13 +330,17 @@ function ShopContent() {
           </div>
         )}
 
-        {filteredProducts.length === 0 && (
+        {sortedProducts.length === 0 && (
           <div className="text-center py-24 px-4 bg-white/50 border border-[#141f36]/5 mt-8">
             <SlidersHorizontal className="h-8 w-8 mx-auto mb-6 text-[#141f36]/20" />
             <p className="font-serif text-xl text-[#141f36]/70 mb-4">No encontramos fragancias con esos criterios.</p>
             <Button 
               variant="outline" 
-              onClick={() => { setSearchQuery(""); setPriceFilter("all"); router.push('/shop?category=sellados') }}
+              onClick={() => { 
+                setSearchQuery(""); 
+                setPriceFilter("all"); 
+                setGenderFilter("all");
+              }}
               className="border-[#c0a062] text-[#c0a062] hover:bg-[#c0a062] hover:text-white uppercase tracking-widest text-[10px] font-bold rounded-none"
             >
               Limpiar Búsqueda

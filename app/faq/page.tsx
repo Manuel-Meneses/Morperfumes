@@ -5,27 +5,59 @@ import { Header } from "@/components/header"
 import { Button } from "@/components/ui/button"
 import { ChevronDown, MessageCircle } from "lucide-react"
 
-// Lista de preguntas frecuentes (Podés editar los textos como quieras)
+// Lista de preguntas frecuentes (Actualizada con la info real del cliente)
 const faqs = [
   {
-    pregunta: "¿Los perfumes son 100% originales?",
-    respuesta: "Sí, absolutamente. En León e Indio solo trabajamos con fragancias 100% originales. Tanto los frascos sellados como nuestros decants provienen directamente de distribuidores oficiales y botellas auténticas."
+    pregunta: "¿Los perfumes son originales?",
+    respuesta: "Todos los perfumes son originales, tanto los que usamos para rellenar los decants como los que vendemos sellados. Todo comprobable por el código de batch (si tenés duda, te paso video del frasco)."
   },
   {
-    pregunta: "¿Qué es exactamente un 'Decant'?",
-    respuesta: "Un decant es una fracción del perfume original. Extraemos el líquido de la botella de diseño original con herramientas de precisión y lo envasamos en frascos más pequeños (3ml, 5ml o 10ml). Es la forma perfecta de probar una fragancia premium en tu piel antes de invertir en la botella completa."
+    pregunta: "¿Se arruina si lo pasan de un frasco a otro?",
+    respuesta: "No. Fraccionamos con jeringa directo del frasco original, sin pasar por spray, así evitamos que el líquido se exponga de más al aire. Usamos frascos de vidrio y los llenamos casi al tope. Es el mismo perfume del frasco grande, en formato chico. Como cualquier perfume, guardalo lejos de la luz y el calor, y usalo dentro de los primeros meses para disfrutarlo en su mejor punto."
   },
   {
-    pregunta: "¿Cómo funciona la modalidad 'Por Encargo'?",
-    respuesta: "Los perfumes por encargo son botellas selladas que traemos especialmente para vos. Una vez que confirmás tu pedido y realizás la seña, lo encargamos a nuestros proveedores. El tiempo estimado de entrega suele ser de 7 a 15 días hábiles."
+    pregunta: "Envíos y demora",
+    respuesta: (
+      <div className="space-y-3">
+        <p>Hacemos envíos a todo el país por Correo Argentino / PAQ.AR. Dentro de la provincia de Córdoba, por motomensajería o coordinando un punto de encuentro.</p>
+        <p>Siempre buscamos despachar lo antes posible tu pedido para que lo tengas disponible.</p>
+        <p>Te confirmo el precio del envío por WhatsApp según tu ubicación y modo de envío (sucursal o domicilio). <strong>Envío gratis en decants a partir de $100.000.</strong></p>
+        <ul className="list-disc pl-5 space-y-1 text-[#141f36]/80 mt-2">
+          <li><strong>Córdoba:</strong> mismo día o a coordinar entre ambas partes.</li>
+          <li><strong>Resto del país:</strong> de 3 a 7 días hábiles.</li>
+        </ul>
+      </div>
+    )
   },
   {
-    pregunta: "¿Realizan envíos a todo el país?",
-    respuesta: "Sí, hacemos envíos a toda Argentina. Cuidamos al máximo el embalaje para que tu fragancia (ya sea un frasco sellado o un decant) llegue en perfectas condiciones a tus manos."
+    pregunta: "¿Puedo conseguir un perfume que no está en el catálogo?",
+    respuesta: "Si no lo encontrás en el apartado de encargos, mandanos un WhatsApp y te decimos si está disponible, los tiempos y el presupuesto."
   },
   {
-    pregunta: "¿Qué métodos de pago aceptan?",
-    respuesta: "Aceptamos transferencias bancarias, Mercado Pago y efectivo. Consultanos por WhatsApp para conocer promociones vigentes o facilidades de pago para perfumes por encargo."
+    pregunta: "¿Cómo funciona el encargo?",
+    respuesta: "Nos decís qué perfume querés y te damos el tiempo aproximado (entre 1 y 2 semanas). Pagás una seña del 50% para confirmar el pedido, y cuando nos llega abonás el resto y te lo enviamos por Correo Argentino o coordinamos entrega en Córdoba."
+  },
+  {
+    pregunta: "¿Qué son los árabes raros?",
+    respuesta: "Perfumes que no te aparecen en el \"para ti\" de TikTok, sin el hype de otros — pero que creemos genuinamente que vale la pena probar y explorar."
+  },
+  {
+    pregunta: "Tamaños de decants",
+    respuesta: (
+      <div className="space-y-2">
+        <p><strong>2,5 ml:</strong> la medida justa para explorar un nuevo aroma y decidir si ir por la botella completa.</p>
+        <p><strong>5 ml:</strong> podés usarlo seguido.</p>
+        <p><strong>10 ml:</strong> es como tener una versión mini de la botella completa, para cuando ya te gusta mucho el perfume y lo querés tener sí o sí a mano.</p>
+      </div>
+    )
+  },
+  {
+    pregunta: "No sé cuál elegir",
+    respuesta: "Podés chequear en cada perfume la situación recomendada. Y si querés una opinión más personal, mandanos un mensaje y te respondemos con toda la calidez del mundo."
+  },
+  {
+    pregunta: "Devolución y política de cambio",
+    respuesta: "Si te llega en mal estado, escribinos y te damos una solución."
   }
 ]
 
@@ -80,7 +112,7 @@ export default function FAQPage() {
               </button>
               
               <div 
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${openIndex === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${openIndex === index ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}
               >
                 <div className="p-5 md:p-6 pt-0 text-[#141f36]/70 leading-relaxed border-t border-[#141f36]/5 mt-2">
                   {faq.respuesta}

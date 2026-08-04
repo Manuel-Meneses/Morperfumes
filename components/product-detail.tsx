@@ -127,10 +127,9 @@ export function ProductDetail({ product }: { product: Product }) {
             </div>
             
             {/* Descripción */}
-            <p className="text-base sm:text-lg text-[#141f36]/70 leading-relaxed mb-10 font-serif italic">
-              "{descripcionSegura}"
+            <p className="text-base sm:text-lg text-[#141f36]/70 leading-relaxed mb-10 font-serif italic whitespace-pre-line">
+              {descripcionSegura}
             </p>
-
             {/* Selección de Formato */}
             <div className={`mb-10 transition-all duration-300 ${showSizeError ? "animate-shake" : ""}`}>
               <div className="flex items-center justify-between mb-4">
