@@ -7,14 +7,13 @@ import Image from "next/image"
 
 async function getTikTokInfo(url: string) {
   try {
-    // Viajamos a la API pública de TikTok
     const response = await fetch(`https://www.tiktok.com/oembed?url=${url}`, { 
-      next: { revalidate: 86400 } // Guarda la foto en caché por 24hs para que tu web cargue rapidísimo
+      next: { revalidate: 86400 } 
     })
     const data = await response.json()
     return {
       title: data.title,
-      image: data.thumbnail_url, // ¡Acá está la portada automática!
+      image: data.thumbnail_url, 
     }
   } catch (error) {
     return null
@@ -24,14 +23,20 @@ async function getTikTokInfo(url: string) {
 export default async function Home() {
   const allProducts = await getProducts()
   
-  // LOGICA SELECCIÓN DEL MES: Busca los que el cliente marcó con "SI" en el Excel
+  // 1. LOGICA SELECCIÓN DEL MES: Busca los que el cliente marcó con "SI" en la columna 'Destacado'
   let perfumesDestacados = allProducts.filter(p => (p as any).isFeatured === true)
-  // Fallback: Si el cliente todavía no puso ningún "SI", mostramos 4 al azar para que no se rompa la página
   if (perfumesDestacados.length === 0) {
     perfumesDestacados = allProducts.slice(0, 4) 
   }
 
-  const perfumesArabesRaros = allProducts.filter(p => p.category.toLowerCase().includes("raro")).slice(0, 5)
+  // 2. LÓGICA ÁRABES RAROS: Busca los que el cliente marcó con "SI" en la NUEVA columna 'Destacado Raro'
+  const todosLosRaros = allProducts.filter(p => p.category.toLowerCase().includes("raro"))
+  const rarosDestacados = todosLosRaros.filter(p => (p as any).isFeaturedRaro === true)
+  const rarosNormales = todosLosRaros.filter(p => (p as any).isFeaturedRaro !== true)
+  // Unimos: Primero los destacados, y rellenamos hasta llegar a 5
+  const perfumesArabesRaros = [...rarosDestacados, ...rarosNormales].slice(0, 5)
+
+  // 3. DISEÑADOR
   const perfumesDisenador = allProducts.filter(p => p.category.includes("Diseñador")).slice(0, 5)
 
   const numeroWA = "5493516087006"
@@ -41,17 +46,13 @@ export default async function Home() {
     return `https://wa.me/${numeroWA}?text=${encodeURIComponent(msj)}`
   }
 
-  // ======================================================================
-  // CONFIGURACIÓN DE TIKTOKS Y REELS
-  // ======================================================================
-const linksDeTikTok = [
-    "https://www.tiktok.com/@morperfumes1/video/7669205385038810375", // Reemplazá por los tuyos
+  const linksDeTikTok = [
+    "https://www.tiktok.com/@morperfumes1/video/7669205385038810375", 
     "https://www.tiktok.com/@morperfumes1/video/7649524647414861063",
     "https://www.tiktok.com/@morperfumes1/video/7654379079579274503",
     "https://www.tiktok.com/@morperfumes1/video/7650292333883280647"
   ]
 
-  // Magia: Convertimos esos links en tarjetas de video completas automáticamente
   const socialVideos = await Promise.all(
     linksDeTikTok.map(async (link, index) => {
       const data = await getTikTokInfo(link)
@@ -59,8 +60,8 @@ const linksDeTikTok = [
         id: index + 1,
         platform: "tiktok",
         title: data?.title || "Reseña exclusiva",
-        views: "Ver reseña", // Como la API no da las vistas exactas, ponemos este texto invitador
-        image: data?.image || "/placeholder.svg", // Portada automática
+        views: "Ver reseña", 
+        image: data?.image || "/placeholder.svg", 
         link: link
       }
     })
@@ -118,9 +119,6 @@ const linksDeTikTok = [
     <div className="min-h-screen bg-[#f6f4ed] relative pb-20 md:pb-0 font-sans selection:bg-[#c0a062] selection:text-[#141f36]"> 
       <Header />
 
-      {/* =======================================================
-          1. HERO
-          ======================================================= */}
       <section className="relative h-[80vh] sm:h-[85vh] flex items-center justify-center bg-[#141f36] overflow-hidden">
         <div className="absolute inset-0 w-full h-full bg-[#141f36]">
           <video
@@ -157,9 +155,6 @@ const linksDeTikTok = [
         </div>
       </section>
 
-      {/* =======================================================
-          2. TRUST BAR
-          ======================================================= */}
       <div className="bg-[#141f36] border-y border-[#c0a062]/20 py-6 relative z-20">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center divide-y md:divide-y-0 md:divide-x divide-[#c0a062]/20">
@@ -179,9 +174,6 @@ const linksDeTikTok = [
         </div>
       </div>
 
-      {/* =======================================================
-          3. MARQUEE DE MARCAS
-          ======================================================= */}
       <div className="bg-[#f6f4ed] py-6 sm:py-8 overflow-hidden flex relative z-20 group border-b border-[#141f36]/10">
         <div className="flex items-center gap-16 sm:gap-24 pr-16 sm:pr-24 whitespace-nowrap animate-marquee-infinite group-hover:[animation-play-state:paused]">
           {brands.map((brand, index) => (
@@ -201,15 +193,13 @@ const linksDeTikTok = [
 
       <section className="relative py-24 sm:py-32 border-b border-[#c0a062]/20 overflow-hidden">
         
-        {/* FONDO DE IMAGEN PARA SELECCIÓN DEL MES */}
         <div className="absolute inset-0 w-full h-full z-0">
           <Image
-            src="/fondo_destacados.jpg" // <--- Guardá tu imagen en la carpeta public con este nombre
+            src="/fondo_destacados.jpg" 
             alt="Fondo Selección del Mes"
             fill
-            className="object-cover opacity-20 grayscale" // Grayscale y baja opacidad para que sea elegante
+            className="object-cover opacity-20 grayscale" 
           />
-          {/* El gradiente azul marino para que se integre con el resto de la página */}
           <div className="absolute inset-0 bg-gradient-to-b from-[#141f36] via-[#141f36]/10 to-[#141f36]/90" />
         </div>
 
@@ -277,9 +267,6 @@ const linksDeTikTok = [
       </section>
 
 
-      {/* =======================================================
-          5. ÁRABES RAROS
-          ======================================================= */}
       <section className="bg-[#141f36] border-b border-[#c0a062]/20 py-24 overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 mb-12 text-center">
           <span className="text-[#c0a062] font-bold tracking-[0.2em] uppercase text-xs mb-3 block">El Oriente en tu piel</span>
@@ -336,9 +323,6 @@ const linksDeTikTok = [
         </div>
       </section>
 
-      {/* =======================================================
-          6. DISEÑADOR
-          ======================================================= */}
       <section className="bg-[#f6f4ed] border-y border-[#141f36]/10 py-24 overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 mb-12 text-center">
           <span className="text-[#141f36]/60 font-bold tracking-[0.2em] uppercase text-xs mb-3 block">Firma Contemporánea</span>
@@ -395,9 +379,6 @@ const linksDeTikTok = [
         </div>
       </section>
 
-      {/* =======================================================
-          7. COMUNIDAD MOR (NUEVO DISEÑO BENTO GRID / MASONRY)
-          ======================================================= */}
       <section className="py-24 sm:py-32 bg-[#e6e2d3]/30 overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6">
           
@@ -412,7 +393,6 @@ const linksDeTikTok = [
             </a>
           </div>
 
-          {/* Grilla Asimétrica Tipo Pantallas de Celular */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             {socialVideos.map((video, index) => (
               <a 
@@ -429,17 +409,14 @@ const linksDeTikTok = [
                   className="object-cover opacity-90 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110" 
                 />
                 
-                {/* Único gradiente optimizado para oscurecer abajo y dejar ver la foto */}
                 <div className="absolute inset-0 bg-gradient-to-t from-[#141f36] via-[#141f36]/20 to-transparent opacity-90" />
                 
-                {/* Botón de Play Central */}
                 <div className="absolute inset-0 flex items-center justify-center z-20">
                   <div className="w-14 h-14 backdrop-blur-sm bg-white/10 rounded-full flex items-center justify-center border border-white/40 group-hover:bg-[#c0a062]/90 group-hover:border-[#c0a062] group-hover:shadow-[0_0_25px_rgba(192,160,98,0.5)] transition-all duration-500 transform group-hover:scale-110">
                     <Play className="h-5 w-5 text-white ml-1" fill="currentColor" />
                   </div>
                 </div>
                 
-                {/* Título inferior limpio */}
                 <div className="absolute bottom-0 left-0 w-full p-5 sm:p-6 z-20 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
                   <h3 className="text-white font-serif text-base sm:text-lg leading-snug drop-shadow-md line-clamp-2">
                     {video.title}
@@ -452,9 +429,6 @@ const linksDeTikTok = [
         </div>
       </section> 
 
-      {/* =======================================================
-          8. PREGUNTAS FRECUENTES (FAQ)
-          ======================================================= */}
       <section id="faq" className="bg-[#f6f4ed] border-t border-[#141f36]/10 py-24 sm:py-32">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="max-w-3xl mx-auto text-center mb-16">
@@ -482,9 +456,6 @@ const linksDeTikTok = [
         </div>
       </section>
 
-      {/* =======================================================
-          9. CONCIERGE DE WHATSAPP
-          ======================================================= */}
       <div className="fixed bottom-0 left-0 w-full z-50 md:bottom-8 md:left-auto md:right-8 md:w-auto">
         <a 
           href="https://wa.me/5493516087006" 
@@ -502,11 +473,6 @@ const linksDeTikTok = [
         </a>
       </div>
 
-      {/* =======================================================
-          10. FOOTER
-{/* =======================================================
-          10. FOOTER (Optimizado para Móvil)
-          ======================================================= */}
       <footer className="bg-[#141f36] text-[#f6f4ed] relative overflow-hidden border-t border-[#c0a062]/20">
         
         {/* Gradiente de fondo adaptativo */}
@@ -570,7 +536,7 @@ const linksDeTikTok = [
             <p className="hover:text-[#c0a062] transition-colors">Diseño & Código de Autor.</p>
           </div>
         </div>
-      </footer> 
+      </footer>
     </div>
   )
 }

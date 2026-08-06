@@ -15,6 +15,7 @@ export interface Product {
   sizePrices?: Record<string, number> // Diccionario mágico de precios por tamaño
   availability: "encargo" | "stock"
   isFeatured?: boolean
+  isFeaturedRaro?: boolean
 }
 
 const SHEET_ID_ENCARGO = "1NLo24Av4lUAuFKbNL0s0NMKIg6bWFg7uRQGdHXOdIxg"
@@ -179,6 +180,7 @@ async function fetchStockSheet(url: string): Promise<Product[]> {
                 sizes: activeSizes, 
                 sizePrices: sizePrices, 
                 isFeatured: row["Destacado"]?.toString().trim().toUpperCase() === "SI",
+                isFeaturedRaro: row["Destacado Raro"]?.toString().trim().toUpperCase() === "SI", // <--- AGREGAR ESTA NUEVA
               }
             })
           resolve(products)
