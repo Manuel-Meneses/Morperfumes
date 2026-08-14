@@ -5,7 +5,6 @@ import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { CartProvider } from "@/components/cart-provider"
 import { Toaster } from "@/components/ui/toaster"
-import { ShippingTicker } from "@/components/shipping-ticker"
 
 // 1. Configuramos nuestra tipografía para el cuerpo del texto
 const lora = Lora({ 
@@ -29,15 +28,15 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: "/icon-light-32x32.png",
+        url: "/icon.png",
         media: "(prefers-color-scheme: light)",
       },
       {
-        url: "/icon-dark-32x32.png",
+        url: "/icon.png",
         media: "(prefers-color-scheme: dark)",
       },
       {
-        url: "/icon.svg",
+        url: "/icon.png",
         type: "image/svg+xml",
       },
     ],
@@ -55,7 +54,6 @@ export default function RootLayout({
     <html lang="es">
       <body className={`${lora.variable} ${cormorant.variable} font-sans antialiased`}>
         <CartProvider>
-          <ShippingTicker />
           {children}
           <Toaster />
         </CartProvider>

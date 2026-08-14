@@ -18,6 +18,18 @@ export interface Product {
   isFeaturedRaro?: boolean
 }
 
+export interface Combo {
+  id: string
+  name: string
+  includes: string[]
+  originalPrice: number
+  price3ml: number | null
+  price5ml: number
+  price10ml: number | null
+  description: string
+  images: string[]
+}
+
 const SHEET_ID_ENCARGO = "1NLo24Av4lUAuFKbNL0s0NMKIg6bWFg7uRQGdHXOdIxg"
 const SHEET_ID_STOCK = "1JJqt7YyPoH3ppHzQ0AT1RihAl7imgo06drwigzw0ta0"
 
@@ -189,6 +201,80 @@ async function fetchStockSheet(url: string): Promise<Product[]> {
     })
   } catch (error) {
     return []
+  }
+}
+
+// ======================================================================
+// LÓGICA DE COMBOS DINÁMICOS (AL FINAL DE lib/api.ts)
+// ======================================================================
+const normalize = (str: string) => {
+  if (!str) return "";
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+}
+
+export async function getCombos(): Promise<Combo[]> {
+  const allProducts = await getProducts();
+
+  const MODO_DEMO = false; 
+
+  try {
+    let rows: any[] = [];
+
+    if (MODO_DEMO) {
+      // (Ignoramos esto porque MODO_DEMO está en false)
+    } else {
+      // 🟢 LECTURA DE TU EXCEL REAL 🟢
+      const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSm56_l8WQ-eUgficmCHwtXbU_shpV6eEYLsKq50kYJGx5qZYFEJtoA0x1NonBMiE8-oE2xVrv2qqeS/pub?gid=0&single=true&output=csv";
+
+      const response = await fetch(csvUrl, { next: { revalidate: 60 } });
+      if (!response.ok) return [];
+
+      const csvText = await response.text();
+      const lines = csvText.split('\n').filter(line => line.trim() !== '');
+      if (lines.length < 2) return []; 
+
+      const headers = lines[0].split(',').map(h => h.trim());
+      rows = lines.slice(1).map(line => {
+        const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); 
+        let obj: any = {};
+        headers.forEach((header, i) => {
+          obj[header] = values[i] ? values[i].replace(/"/g, '').trim() : '';
+        });
+        return obj;
+      }).filter(row => row["Nombre"] && row["Nombre"].trim() !== "");
+    }
+
+    // MAPEO A LA INTERFAZ FINAL
+    return rows.map((row: any) => {
+      const nombresIncluidos = [row["Incluye_1"], row["Incluye_2"], row["Incluye_3"]].filter(item => item && item.trim() !== "");
+
+      // BUSCADOR DE FOTOS MEJORADO
+      const productosDelCombo = nombresIncluidos.map(nombreDelExcel => {
+        // MAGIA ACÁ: Le borramos la palabra "decant" (y paréntesis) solo para buscar la foto
+        const cleanSearch = normalize(nombreDelExcel).replace(/\(?decant\)?/g, "").trim();
+        
+        // Buscamos el nombre limpio en tu base de productos
+        return allProducts.find(p => normalize(p.name).includes(cleanSearch));
+      }).filter(Boolean);
+
+      const fotosExtraidas = productosDelCombo.map(p => p?.image).filter(Boolean) as string[];
+
+      return {
+        id: row["ID"] || `combo-${Math.random().toString(36).substr(2, 9)}`,
+        name: row["Nombre"],
+        includes: nombresIncluidos,
+        originalPrice: parseInt(row["Precio_Original"]) || 0,
+        price3ml: parseInt(row["Precio_Combo_3ml"]) || null,
+        price5ml: parseInt(row["Precio_Combo_5ml"]) || 0,
+        price10ml: parseInt(row["Precio_Combo_10ml"]) || null,
+        description: row["Descripcion"] || "",
+        images: fotosExtraidas.length > 0 ? fotosExtraidas : []
+      }
+    });
+
+  } catch (error) {
+    console.error("Error cargando combos:", error);
+    return [];
   }
 }
 

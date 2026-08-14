@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, Suspense } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
+import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { Header } from "@/components/header"
 import { ProductGrid } from "@/components/product-grid"
 import { Button } from "@/components/ui/button"
@@ -14,7 +14,11 @@ const ITEMS_PER_PAGE = 12
 function ShopContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const pathname = usePathname()
+  
+  // Leemos la categoría y la PÁGINA directamente de la URL
   const categoryParam = searchParams.get("category") || "sellados"
+  const pageParam = parseInt(searchParams.get("page") || "1", 10)
 
   const [allProducts, setAllProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -24,7 +28,9 @@ function ShopContent() {
   const [genderFilter, setGenderFilter] = useState("all")
   const [designerFirst, setDesignerFirst] = useState(false) 
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(true) 
-  const [currentPage, setCurrentPage] = useState(1)
+  
+  // El estado interno de la página ahora se sincroniza con la URL
+  const [currentPage, setCurrentPage] = useState(pageParam)
 
   useEffect(() => {
     async function load() {
@@ -35,9 +41,18 @@ function ShopContent() {
     load()
   }, [])
 
+  // Sincronizar cambios en los filtros con la página 1, pero sin borrar la URL base
   useEffect(() => {
     setCurrentPage(1)
   }, [categoryParam, searchQuery, priceFilter, genderFilter, designerFirst])
+
+  // Lógica para actualizar la URL sin recargar la página cuando cambia de página
+  const changePage = (newPage: number) => {
+    setCurrentPage(newPage)
+    const params = new URLSearchParams(searchParams.toString())
+    params.set("page", newPage.toString())
+    router.push(`${pathname}?${params.toString()}`, { scroll: true })
+  }
 
   const normalize = (str: string) => {
     if (!str) return ""
@@ -53,7 +68,7 @@ function ShopContent() {
     const nameNorm = normalize(p.name || "")
     const detailsNorm = normalize((p.details || []).join(" "))
     
-    // Categoría (Sellados vs Decants)
+    // Categoría
     let matchesCategory = false
     const isDecantTab = webCatNorm.includes("decant") || catNorm.includes("decant") || catNorm.includes("raro") || nameNorm.includes("decant")
     const isSelladoTab = webCatNorm.includes("sellado") || !isDecantTab
@@ -62,18 +77,14 @@ function ShopContent() {
     else if (query === "decants") matchesCategory = isDecantTab
     else matchesCategory = true
 
-    // Búsqueda por texto
+    // Búsqueda estricta por título
     let matchesSearch = true
     if (searchQuery) {
       const searchNorm = normalize(searchQuery)
-      matchesSearch = 
-        nameNorm.includes(searchNorm) || 
-        normalize(p.notes || "").includes(searchNorm) || 
-        normalize((p as any).description || "").includes(searchNorm) ||
-        catNorm.includes(searchNorm)
+      matchesSearch = nameNorm.includes(searchNorm)
     }
 
-    // 🛡️ FILTRO DE GÉNERO BLINDADO
+    // Filtro de género
     let matchesGender = true
     if (genderFilter !== "all") {
       const searchArea = (" " + nameNorm + " " + detailsNorm + " ").replace(/\s+/g, " ")
@@ -97,7 +108,7 @@ function ShopContent() {
       }
     }
 
-    // Precio Dinámico (Depende del switch)
+    // Precio Dinámico
     let matchesPrice = true
     if (designerFirst) {
       if (priceFilter === "low") matchesPrice = p.price > 0 && p.price <= 150000
@@ -112,7 +123,7 @@ function ShopContent() {
     return matchesCategory && matchesSearch && matchesGender && matchesPrice
   })
 
-  // 2. ORDENAMIENTO (El Switch en acción)
+  // 2. ORDENAMIENTO
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     const aCat = normalize(a.category || "")
     const bCat = normalize(b.category || "")
@@ -131,18 +142,22 @@ function ShopContent() {
   // 3. PAGINACIÓN
   const totalPages = Math.ceil(sortedProducts.length / ITEMS_PER_PAGE)
   
+  // Si la url dice "página 5" pero al filtrar solo hay 2 páginas, lo forzamos a la 1 para no mostrar vacío.
+  const validCurrentPage = currentPage > totalPages ? 1 : Math.max(1, currentPage)
+
   const currentProducts = sortedProducts.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    (validCurrentPage - 1) * ITEMS_PER_PAGE,
+    validCurrentPage * ITEMS_PER_PAGE
   )
 
   const handleCategoryChange = (catId: string) => {
-    router.push(`/shop?category=${catId}`, { scroll: false })
+    // Al cambiar de categoría, volvemos a la página 1 y actualizamos la URL
+    router.push(`/shop?category=${catId}&page=1`, { scroll: false })
   }
 
   const tabs = [
     { id: "sellados", label: "Sellados", subtitle: "Árabes & Diseñador" },
-    { id: "decants", label: "Decants", subtitle: "Raros & Fraccionados" }, // Acorté el texto para móvil
+    { id: "decants", label: "Decants", subtitle: "Raros & Fraccionados" },
   ]
 
   if (loading) {
@@ -157,10 +172,8 @@ function ShopContent() {
   }
 
   return (
-    // Agregamos overflow-x-hidden para matar el scroll horizontal
-    <div className="min-h-screen bg-[#f6f4ed] overflow-x-hidden">
+    <div className="min-h-screen bg-[#f6f4ed] overflow-x-clip w-full relative">
       <Header />
-      {/* Redujimos un poco el padding en móviles para ganar espacio */}
       <div className="container mx-auto px-2 md:px-6 py-8 md:py-16 max-w-full">
         
         {/* Cabecera Principal */}
@@ -173,7 +186,7 @@ function ShopContent() {
           </p>
         </div>
 
-        {/* Pestañas de Navegación (Super Optimizadas para Móvil) */}
+        {/* Pestañas de Navegación */}
         <div className="flex justify-center mb-8 md:mb-12 w-full">
           <div className="flex w-full sm:w-auto flex-row justify-between md:justify-center gap-1 sm:gap-8 md:gap-24 pb-4 border-b border-[#141f36]/10 px-1 md:px-4">
             {tabs.map(tab => (
@@ -216,7 +229,7 @@ function ShopContent() {
         {showAdvancedFilters && (
           <div className="bg-white border border-[#141f36]/5 p-4 md:p-6 mb-8 md:mb-10 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
             
-            {/* 1. SWITCH DE PRIORIDAD */}
+            {/* SWITCH DE PRIORIDAD */}
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 md:mb-8 pb-6 md:pb-8 border-b border-[#141f36]/10 gap-4">
               <span className="text-[9px] md:text-xs font-bold uppercase tracking-widest text-[#141f36]">Configurar Escala</span>
               <div className="flex flex-row w-full md:w-auto p-1 bg-[#f6f4ed] border border-[#141f36]/10 rounded-sm">
@@ -239,7 +252,7 @@ function ShopContent() {
               </div>
             </div>
 
-            {/* 2. FILTROS DE BÚSQUEDA, GÉNERO Y PRECIO */}
+            {/* FILTROS DE BÚSQUEDA, GÉNERO Y PRECIO */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6">
               
               <div className="relative">
@@ -249,7 +262,7 @@ function ShopContent() {
                   placeholder="Buscar esencia..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 md:pl-12 pr-4 py-3 md:py-3 bg-transparent border border-[#141f36]/10 md:border-t-0 md:border-l-0 md:border-r-0 md:border-b md:border-[#141f36]/20 focus:outline-none focus:border-[#c0a062] transition-all font-serif text-sm md:text-base text-[#141f36] placeholder:text-[#141f36]/40 rounded-sm md:rounded-none"
+                  className="w-full pl-10 md:pl-12 pr-4 py-3 md:py-3 bg-transparent border border-[#141f36]/10 md:border-t-0 md:border-l-0 md:border-r-0 md:border-b md:border-[#141f36]/20 focus:outline-none focus:border-[#c0a062] transition-all font-serif text-base text-[#141f36] placeholder:text-[#141f36]/40 rounded-sm md:rounded-none"
                 />
               </div>
 
@@ -258,7 +271,7 @@ function ShopContent() {
                 <select 
                   value={genderFilter}
                   onChange={(e) => setGenderFilter(e.target.value)}
-                  className="w-full pl-10 md:pl-12 pr-8 md:pr-10 py-3 md:py-3 bg-transparent border border-[#141f36]/10 md:border-t-0 md:border-l-0 md:border-r-0 md:border-b md:border-[#141f36]/20 appearance-none focus:outline-none focus:border-[#c0a062] transition-all font-serif text-sm md:text-base text-[#141f36] cursor-pointer rounded-sm md:rounded-none"
+                  className="w-full pl-10 md:pl-12 pr-8 md:pr-10 py-3 md:py-3 bg-transparent border border-[#141f36]/10 md:border-t-0 md:border-l-0 md:border-r-0 md:border-b md:border-[#141f36]/20 appearance-none focus:outline-none focus:border-[#c0a062] transition-all font-serif text-base text-[#141f36] cursor-pointer rounded-sm md:rounded-none"
                 >
                   <option value="all">Todos los Géneros</option>
                   <option value="masculino">Masculino</option>
@@ -275,7 +288,7 @@ function ShopContent() {
                 <select 
                   value={priceFilter}
                   onChange={(e) => setPriceFilter(e.target.value)}
-                  className="w-full pl-10 md:pl-12 pr-8 md:pr-10 py-3 md:py-3 bg-transparent border border-[#141f36]/10 md:border-t-0 md:border-l-0 md:border-r-0 md:border-b md:border-[#141f36]/20 appearance-none focus:outline-none focus:border-[#c0a062] transition-all font-serif text-sm md:text-base text-[#141f36] cursor-pointer rounded-sm md:rounded-none"
+                  className="w-full pl-10 md:pl-12 pr-8 md:pr-10 py-3 md:py-3 bg-transparent border border-[#141f36]/10 md:border-t-0 md:border-l-0 md:border-r-0 md:border-b md:border-[#141f36]/20 appearance-none focus:outline-none focus:border-[#c0a062] transition-all font-serif text-base text-[#141f36] cursor-pointer rounded-sm md:rounded-none"
                 >
                   <option value="all">Cualquier Precio</option>
                   {designerFirst ? (
@@ -306,12 +319,12 @@ function ShopContent() {
           <ProductGrid products={currentProducts} layout="grid" />
         </div>
 
-        {/* Paginación */}
+        {/* Paginación - AHORA LLAMA A LA FUNCIÓN changePage() QUE ACTUALIZA LA URL */}
         {totalPages > 1 && (
           <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4 mt-12 md:mt-16 mb-8">
             <button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
+              onClick={() => changePage(Math.max(validCurrentPage - 1, 1))}
+              disabled={validCurrentPage === 1}
               className="p-2 md:p-3 border border-[#141f36]/10 text-[#141f36] disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#c0a062] hover:text-[#c0a062] transition-all rounded-full"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -321,9 +334,9 @@ function ShopContent() {
               {Array.from({ length: totalPages }).map((_, i) => (
                 <button
                   key={i}
-                  onClick={() => setCurrentPage(i + 1)}
+                  onClick={() => changePage(i + 1)}
                   className={`w-8 h-8 md:w-10 md:h-10 font-serif text-xs md:text-sm transition-all rounded-full ${
-                    currentPage === i + 1 
+                    validCurrentPage === i + 1 
                       ? "bg-[#141f36] text-[#f6f4ed]" 
                       : "bg-transparent text-[#141f36]/60 hover:text-[#141f36]"
                   }`}
@@ -334,8 +347,8 @@ function ShopContent() {
             </div>
 
             <button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
+              onClick={() => changePage(Math.min(validCurrentPage + 1, totalPages))}
+              disabled={validCurrentPage === totalPages}
               className="p-2 md:p-3 border border-[#141f36]/10 text-[#141f36] disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#c0a062] hover:text-[#c0a062] transition-all rounded-full"
             >
               <ChevronRight className="w-4 h-4" />

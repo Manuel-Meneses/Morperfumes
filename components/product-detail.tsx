@@ -5,14 +5,14 @@ import Image from "next/image"
 import { Button } from "./ui/button"
 import { useCart } from "./cart-provider"
 import { useToast } from "@/hooks/use-toast"
-import { Check, ShoppingBag, AlertCircle } from "lucide-react"
+import { Check, ShoppingBag, AlertCircle, MessageCircle } from "lucide-react"
 
 interface Product {
   id: string
   name: string
   price: number
   image?: string
-  images?: string[] // Acá llegarán las fotos internas (diferentes a la principal)
+  images?: string[] 
   category: string
   description?: string
   details?: string[]
@@ -26,9 +26,6 @@ export function ProductDetail({ product }: { product: Product }) {
   const { addItem } = useCart()
   const { toast } = useToast()
 
-  // 🛡️ EL BLINDAJE Y LAS FOTOS INTERNAS:
-  // Si enviaste fotos en el array 'images' (las internas), usamos esas. 
-  // Si no, usamos la principal por defecto.
   const imagenesSeguras = product.images && product.images.length > 0 
     ? product.images 
     : [product.image || "/placeholder.svg"]
@@ -37,7 +34,6 @@ export function ProductDetail({ product }: { product: Product }) {
   const tamanosSeguros = product.sizes || ["Decant 1.25ml", "Decant 2.5ml", "Decant 5ml", "Decant 10ml", "Frasco Sellado"]
   const descripcionSegura = product.description || `Descubrí la esencia de ${product.name}.`
 
-  // Lógica para calcular el precio
   const calcularPrecioPorFormato = (size: string) => {
     if (size === "Frasco Sellado") return product.price
     if (size === "Decant 10ml") return Math.round(product.price * 0.15)
@@ -86,18 +82,45 @@ export function ProductDetail({ product }: { product: Product }) {
     }, 2000)
   }
 
+  const handleWhatsAppClick = () => {
+    if (!selectedSize) {
+      setShowSizeError(true)
+      toast({
+        title: "Seleccioná un formato",
+        description: "Elegí el tamaño para que podamos confirmarte el stock exacto.",
+        variant: "destructive",
+        duration: 3000,
+      })
+      setTimeout(() => setShowSizeError(false), 1000)
+      return
+    }
+
+    const numeroWA = "5493516087006"
+    
+    const notasFormateadas = product.details && product.details.length > 0 
+      ? product.details.join(" | ") 
+      : "No especificadas"
+    
+    let mensaje = `¡Hola León e Indio! Me interesa el perfume *${product.name}*.\n\n`
+    mensaje += `Especificaciones:\n`
+    mensaje += `- Formato: ${selectedSize}\n` 
+    mensaje += `- Precio: $${precioActual.toLocaleString("es-AR")}\n`
+    mensaje += `- Notas: ${notasFormateadas}\n\n`
+    mensaje += `¿Tienen stock disponible para encargar?`
+
+    window.open(`https://wa.me/${numeroWA}?text=${encodeURIComponent(mensaje)}`, '_blank')
+  }
+
   return (
     <div className="bg-[#f6f4ed] min-h-screen text-[#141f36]">
       <div className="container mx-auto px-4 sm:px-6 py-8 md:py-16 max-w-[1400px]">
         
-        {/* Layout Editorial: 60% Fotos / 40% Info */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
           
-          {/* COLUMNA IZQUIERDA: Galería de Fotos Apiladas (Scrollable) */}
+          {/* Galería de Fotos */}
           <div className="lg:col-span-7 flex flex-col gap-4 md:gap-8">
             {imagenesSeguras.map((img, index) => (
               <div key={index} className="relative aspect-[4/5] bg-white border border-[#141f36]/5 overflow-hidden group">
-                {/* Efecto de marco interno elegante */}
                 <div className="absolute inset-4 sm:inset-6 border border-[#141f36]/5 pointer-events-none z-10 transition-colors duration-500 group-hover:border-[#c0a062]/30" />
                 <Image
                   src={img || "/placeholder.svg"}
@@ -110,10 +133,9 @@ export function ProductDetail({ product }: { product: Product }) {
             ))}
           </div>
 
-          {/* COLUMNA DERECHA: Información (Sticky) */}
+          {/* Información (Sticky) */}
           <div className="lg:col-span-5 lg:sticky lg:top-24 flex flex-col pt-4 lg:pt-0">
             
-            {/* Encabezado */}
             <div className="mb-8 border-b border-[#141f36]/10 pb-8">
               <p className="text-[#c0a062] font-bold tracking-[0.2em] uppercase text-xs mb-4">
                 {product.category}
@@ -126,10 +148,10 @@ export function ProductDetail({ product }: { product: Product }) {
               </p>
             </div>
             
-            {/* Descripción */}
             <p className="text-base sm:text-lg text-[#141f36]/70 leading-relaxed mb-10 font-serif italic whitespace-pre-line">
               {descripcionSegura}
             </p>
+
             {/* Selección de Formato */}
             <div className={`mb-10 transition-all duration-300 ${showSizeError ? "animate-shake" : ""}`}>
               <div className="flex items-center justify-between mb-4">
@@ -170,25 +192,39 @@ export function ProductDetail({ product }: { product: Product }) {
               </div>
             </div>
 
-            {/* Botón de Compra Premium */}
-            <Button
-              type="button"
-              onClick={handleAddToCart}
-              disabled={isAdding}
-              className="w-full h-14 md:h-16 text-xs sm:text-sm font-bold uppercase tracking-[0.2em] mb-12 transition-all duration-300 bg-[#c0a062] hover:bg-[#141f36] text-[#141f36] hover:text-[#f6f4ed] rounded-none border-none shadow-xl disabled:opacity-90"
-            >
-              {isAdding ? (
-                <>
-                  <Check className="h-4 w-4 mr-3 animate-in zoom-in-50 duration-300" />
-                  Agregado a la Colección
-                </>
-              ) : (
-                <>
-                  <ShoppingBag className="h-4 w-4 mr-3" />
-                  Seleccionar para Encargo
-                </>
-              )}
-            </Button>
+            {/* BOTONERA DE COMPRA (TAMAÑO MAXIMIZADO PARA MÓVILES) */}
+            <div className="flex flex-col gap-4 mb-12">
+              {/* 1. Botón de Compra Web */}
+              <Button
+                type="button"
+                onClick={handleAddToCart}
+                disabled={isAdding}
+                className="w-full h-16 md:h-20 text-sm md:text-base font-bold uppercase tracking-[0.2em] transition-all duration-300 bg-[#c0a062] hover:bg-[#141f36] text-[#141f36] hover:text-[#f6f4ed] rounded-none border-none shadow-xl disabled:opacity-90"
+              >
+                {isAdding ? (
+                  <>
+                    <Check className="h-5 w-5 mr-3 animate-in zoom-in-50 duration-300" />
+                    Agregado a la Colección
+                  </>
+                ) : (
+                  <>
+                    <ShoppingBag className="h-5 w-5 mr-3" />
+                    Añadir al Carrito
+                  </>
+                )}
+              </Button>
+
+              {/* 2. Botón de Compra por WhatsApp */}
+              <Button
+                type="button"
+                onClick={handleWhatsAppClick}
+                variant="outline"
+                className="w-full h-16 md:h-16 text-sm font-bold uppercase tracking-[0.1em] transition-all duration-300 border-[#25D366] text-[#25D366] hover:bg-[#25D366] hover:text-white rounded-none shadow-sm"
+              >
+                <MessageCircle className="h-5 w-5 mr-3" />
+                Consultar Stock por WhatsApp
+              </Button>
+            </div>
 
             {/* Acordeón Fijo de Detalles */}
             <div className="border-t border-[#141f36]/10 pt-8">

@@ -1,8 +1,9 @@
 import { Header } from "@/components/header"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { getProducts } from "@/lib/api"
-import { Play, ShieldCheck, Truck, MessageSquare, ChevronDown, ArrowRight, MessageCircle, Instagram } from "lucide-react"
+import { getProducts, getCombos } from "@/lib/api"
+import { InteractiveComboCard } from "@/components/interactive-combo-card"
+import { Play, ShieldCheck, Truck, MessageSquare, ChevronDown, ArrowRight, MessageCircle, Package } from "lucide-react"
 import Image from "next/image"
 
 async function getTikTokInfo(url: string) {
@@ -23,17 +24,20 @@ async function getTikTokInfo(url: string) {
 export default async function Home() {
   const allProducts = await getProducts()
   
-  // 1. LOGICA SELECCIÓN DEL MES: Busca los que el cliente marcó con "SI" en la columna 'Destacado'
+  // TRAEMOS LOS COMBOS PARA EL EFECTO CAJA
+  const allCombos = await getCombos()
+  const featuredCombos = allCombos.slice(0, 3) 
+  
+  // 1. LOGICA SELECCIÓN DEL MES
   let perfumesDestacados = allProducts.filter(p => (p as any).isFeatured === true)
   if (perfumesDestacados.length === 0) {
     perfumesDestacados = allProducts.slice(0, 4) 
   }
 
-  // 2. LÓGICA ÁRABES RAROS: Busca los que el cliente marcó con "SI" en la NUEVA columna 'Destacado Raro'
+  // 2. LÓGICA ÁRABES RAROS
   const todosLosRaros = allProducts.filter(p => p.category.toLowerCase().includes("raro"))
   const rarosDestacados = todosLosRaros.filter(p => (p as any).isFeaturedRaro === true)
   const rarosNormales = todosLosRaros.filter(p => (p as any).isFeaturedRaro !== true)
-  // Unimos: Primero los destacados, y rellenamos hasta llegar a 5
   const perfumesArabesRaros = [...rarosDestacados, ...rarosNormales].slice(0, 5)
 
   // 3. DISEÑADOR
@@ -191,16 +195,19 @@ export default async function Home() {
         </div>
       </div>
 
-      <section className="relative py-24 sm:py-32 border-b border-[#c0a062]/20 overflow-hidden">
+        <section className="relative py-24 sm:py-32 border-b border-[#c0a062]/20 overflow-hidden">
         
+        {/* FONDO OPTIMIZADO */}
         <div className="absolute inset-0 w-full h-full z-0">
           <Image
             src="/fondo_destacados.jpg" 
             alt="Fondo Selección del Mes"
             fill
             className="object-cover opacity-20 grayscale" 
+            priority // Ayuda a que la imagen de fondo cargue más rápido
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#141f36] via-[#141f36]/10 to-[#141f36]/90" />
+          {/* Simplificamos el gradiente para que el navegador no sufra */}
+          <div className="absolute inset-0 bg-[#141f36]/70" />
         </div>
 
         <div className="relative z-10 w-full">
@@ -219,22 +226,25 @@ export default async function Home() {
             <span className="animate-pulse flex items-center gap-2">Deslizá para explorar <ArrowRight className="h-3.5 w-3.5"/></span>
           </div>
 
-          <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 sm:gap-8 px-6 sm:px-12 md:px-24 pb-8 w-full [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-[#141f36] [&::-webkit-scrollbar-thumb]:bg-[#c0a062]/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#c0a062] transition-colors">
-            {perfumesDestacados.map((product, index) => (
+          {/* CONTENEDOR DEL SCROLL: snap-proximity y scroll-smooth agregados */}
+          <div className="flex overflow-x-auto snap-x snap-proximity scroll-smooth gap-6 sm:gap-8 px-6 sm:px-12 md:px-24 pb-8 w-full [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-[#141f36] [&::-webkit-scrollbar-thumb]:bg-[#c0a062]/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#c0a062] transition-colors">
+            {perfumesDestacados.map((product) => (
               <div 
                 key={product.id} 
-                className="group relative flex flex-col p-6 sm:p-8 bg-[#1a2640]/90 backdrop-blur-sm border border-[#f6f4ed]/10 hover:border-[#c0a062] transition-all duration-500 shrink-0 w-[85vw] max-w-[300px] sm:max-w-[340px] snap-center hover:-translate-y-2 mt-2 shadow-2xl"
+                // Sacamos el backdrop-blur-sm para eliminar el lag en Chrome
+                className="group relative flex flex-col p-6 sm:p-8 bg-[#1a2640] border border-[#f6f4ed]/10 hover:border-[#c0a062] transition-all duration-300 shrink-0 w-[85vw] max-w-[300px] sm:max-w-[340px] snap-center hover:-translate-y-2 mt-2 shadow-xl"
               >
                 <div className="absolute top-0 left-0 bg-[#c0a062] text-[#141f36] px-3.5 py-1.5 text-xs font-bold uppercase tracking-widest z-20 rounded-br-lg shadow-md">
                   Recomendado
                 </div>
 
                 <Link href={`/product/${product.id}`} className="relative w-full aspect-[4/5] mb-6 mt-4 block cursor-pointer">
+                  {/* Simplificamos la animación de la imagen a duration-300 */}
                   <Image 
                     src={product.image || "/placeholder.svg"} 
                     alt={product.name} 
                     fill 
-                    className="object-contain transform transition-transform duration-700 ease-out group-hover:scale-105" 
+                    className="object-contain transform transition-transform duration-300 group-hover:scale-105" 
                   />
                 </Link>
 
@@ -265,6 +275,195 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+            {/* =======================================================
+          SECCIÓN NUEVA: COMBOS & COFFRETS (Efecto "Caja 3D" INTERACTIVA)
+          ======================================================= */}
+      {featuredCombos.length > 0 && (
+        <section className="py-24 sm:py-32 bg-[#141f36] relative overflow-hidden border-t border-[#c0a062]/20">
+          
+          <div className="absolute inset-0 w-full h-full z-0">
+            <Image
+              src="/fondo_combos.jpg" 
+              alt="Fondo Discovery Sets"
+              fill
+              className="object-cover opacity-20 grayscale" 
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#141f36]/10 via-[#141f36]/10 to-[#0f1b36] opacity-90" />
+          </div>
+
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[400px] bg-[radial-gradient(ellipse_at_top,_rgba(192,160,98,0.1)_0%,_transparent_70%)] pointer-events-none z-0" />
+
+          <div className="mt-16 w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-0">
+              <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-12 md:overflow-visible md:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                {featuredCombos.map(combo => (
+                  <div key={combo.id} className="min-w-[85vw] sm:min-w-[350px] snap-center md:min-w-0 md:w-auto">
+                    <InteractiveComboCard combo={combo}/>
+                  </div>
+                ))}
+              </div>
+            </div>
+        </section>
+      )}
+
+      <section className="bg-[#141f36] border-b border-[#c0a062]/20 py-24 overflow-hidden">
+        <div className="container mx-auto px-4 sm:px-6 mb-12 text-center">
+          <span className="text-[#c0a062] font-bold tracking-[0.2em] uppercase text-xs mb-3 block">El Oriente en tu piel</span>
+          <h2 className="font-serif text-4xl md:text-5xl font-medium text-[#f6f4ed] mb-4">
+            Árabes Raros
+          </h2>
+          <Button variant="link" asChild className="text-[#c0a062] hover:text-[#f6f4ed] text-base group">
+            <Link href="/shop?category=decants" className="flex items-center gap-2">
+              Explorar Colección <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </Button>
+        </div>
+
+        <div className="relative w-full pt-4">
+          <div className="absolute bottom-[20px] sm:bottom-[24px] left-0 w-full h-12 border-t-2 border-[#c0a062]/30 bg-gradient-to-b from-[#c0a062]/10 to-transparent z-0" />
+
+          <div className="flex overflow-x-auto snap-x snap-mandatory gap-8 sm:gap-12 px-6 sm:px-12 md:px-24 w-full [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-[#141f36] [&::-webkit-scrollbar-thumb]:bg-[#c0a062]/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#c0a062] pb-14 sm:pb-16 relative z-10">
+            {perfumesArabesRaros.map(product => (
+              <div key={product.id} className="snap-center shrink-0 w-48 sm:w-60 flex flex-col items-center group pt-6">
+                
+                <Link href={`/product/${product.id}`} className="relative h-60 sm:h-76 w-full flex items-end justify-center mb-6 transform transition-transform duration-500 group-hover:-translate-y-4 cursor-pointer">
+                  <Image 
+                    src={product.image} 
+                    alt={product.name} 
+                    fill 
+                    className="object-contain object-bottom drop-shadow-[0_20px_15px_rgba(0,0,0,0.7)] transition-transform duration-500 group-hover:scale-105" 
+                  />
+                </Link>
+
+                <div className="text-center w-full flex flex-col">
+                  <Link href={`/product/${product.id}`} className="cursor-pointer group-hover:text-[#c0a062] transition-colors">
+                    <h3 className="font-serif text-lg sm:text-xl text-[#f6f4ed] font-medium leading-tight mb-2 line-clamp-2">{product.name}</h3>
+                    <p className="font-serif text-[#c0a062] font-semibold text-xl mb-4">${product.price.toLocaleString("es-AR")}</p>
+                  </Link>
+                  <div className="flex gap-2 w-full mt-auto relative z-20">
+                    <Link href={`/product/${product.id}`} className="flex-1 bg-transparent border border-[#c0a062]/50 text-[#c0a062] hover:bg-[#c0a062] hover:text-[#141f36] text-[10px] sm:text-xs font-bold py-2.5 px-2 flex items-center justify-center transition-colors rounded-sm uppercase tracking-widest">
+                      Ver Detalles
+                    </Link>
+                    <a href={getWaLink(product.name, product.price)} target="_blank" rel="noopener noreferrer" className="bg-[#25D366] text-white p-2.5 flex items-center justify-center hover:bg-[#128C7E] transition-colors rounded-sm shadow-md" aria-label="Consultar por WhatsApp">
+                      <MessageCircle className="w-5 h-5"/>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            <div className="snap-center shrink-0 w-36 sm:w-44 flex flex-col items-center justify-center pt-6 pb-14 sm:pb-16">
+               <Link href="/shop?category=decants" className="flex flex-col items-center justify-center h-60 sm:h-76 w-full border border-[#c0a062]/30 rounded-t-full hover:bg-[#c0a062]/10 transition-colors group mb-6">
+                  <span className="text-[#c0a062] text-xs uppercase tracking-widest font-bold mb-2">Ver Todo</span>
+                  <ArrowRight className="h-5 w-5 text-[#c0a062] transform group-hover:translate-x-2 transition-transform" />
+               </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[#f6f4ed] border-y border-[#141f36]/10 py-24 overflow-hidden">
+        <div className="container mx-auto px-4 sm:px-6 mb-12 text-center">
+          <span className="text-[#141f36]/60 font-bold tracking-[0.2em] uppercase text-xs mb-3 block">Firma Contemporánea</span>
+          <h2 className="font-serif text-4xl md:text-5xl font-medium text-[#141f36] mb-4">
+            Catálogo de Diseñador
+          </h2>
+          <Button variant="link" asChild className="text-[#141f36] hover:text-[#c0a062] text-base group">
+            <Link href="/shop?category=sellados" className="flex items-center gap-2">
+              Ver Clásicos <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </Button>
+        </div>
+
+        <div className="relative w-full pt-4">
+          <div className="absolute bottom-[20px] sm:bottom-[24px] left-0 w-full h-12 border-t-2 border-[#141f36]/20 bg-gradient-to-b from-[#141f36]/5 to-transparent z-0" />
+
+          <div className="flex overflow-x-auto snap-x snap-mandatory gap-8 sm:gap-12 px-6 sm:px-12 md:px-24 w-full [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-[#f6f4ed] [&::-webkit-scrollbar-thumb]:bg-[#141f36]/30 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#141f36]/60 pb-14 sm:pb-16 relative z-10">
+            {perfumesDisenador.map(product => (
+              <div key={product.id} className="snap-center shrink-0 w-48 sm:w-60 flex flex-col items-center group pt-6">
+                
+                <Link href={`/product/${product.id}`} className="relative h-60 sm:h-76 w-full flex items-end justify-center mb-6 transform transition-transform duration-500 group-hover:-translate-y-4 cursor-pointer">
+                  <Image 
+                    src={product.image} 
+                    alt={product.name} 
+                    fill 
+                    className="object-contain object-bottom drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)] transition-transform duration-500 group-hover:scale-105" 
+                  />
+                </Link>
+
+                <div className="text-center w-full flex flex-col">
+                  <Link href={`/product/${product.id}`} className="cursor-pointer group-hover:text-[#c0a062] transition-colors">
+                    <h3 className="font-serif text-lg sm:text-xl text-[#141f36] font-medium leading-tight mb-2 line-clamp-2">{product.name}</h3>
+                    <p className="font-serif text-[#141f36] font-semibold text-xl mb-4">${product.price.toLocaleString("es-AR")}</p>
+                  </Link>
+                  <div className="flex gap-2 w-full mt-auto relative z-20">
+                    <Link href={`/product/${product.id}`} className="flex-1 bg-transparent border border-[#141f36]/30 text-[#141f36] hover:bg-[#141f36] hover:text-[#f6f4ed] text-[10px] sm:text-xs font-bold py-2.5 px-2 flex items-center justify-center transition-colors rounded-sm uppercase tracking-widest">
+                      Ver Detalles
+                    </Link>
+                    <a href={getWaLink(product.name, product.price)} target="_blank" rel="noopener noreferrer" className="bg-[#25D366] text-white p-2.5 flex items-center justify-center hover:bg-[#128C7E] transition-colors rounded-sm shadow-md" aria-label="Consultar por WhatsApp">
+                      <MessageCircle className="w-5 h-5"/>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            <div className="snap-center shrink-0 w-36 sm:w-44 flex flex-col items-center justify-center pt-6 pb-14 sm:pb-16">
+               <Link href="/shop?category=sellados" className="flex flex-col items-center justify-center h-60 sm:h-76 w-full border border-[#141f36]/30 rounded-t-full hover:bg-[#141f36]/10 transition-colors group mb-6">
+                  <span className="text-[#141f36] text-xs uppercase tracking-widest font-bold mb-2">Ver Todo</span>
+                  <ArrowRight className="h-5 w-5 text-[#141f36] transform group-hover:translate-x-2 transition-transform" />
+               </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+
+      <section className="py-24 sm:py-32 bg-[#e6e2d3]/30 overflow-hidden">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+            <div className="max-w-2xl">
+              <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-medium text-[#141f36] leading-tight">
+                La perfumería, <br/> contada en primera persona.
+              </h2>
+            </div>
+            <a href="https://instagram.com/morperfumes_" target="_blank" rel="noreferrer" className="shrink-0 pb-2 border-b border-[#141f36] text-[#141f36] font-medium hover:text-[#c0a062] hover:border-[#c0a062] transition-colors flex items-center gap-2">
+              Seguinos en redes <ArrowRight className="w-4 h-4" />
+            </a>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+            {socialVideos.map((video, index) => (
+              <a 
+                key={video.id} 
+                href={video.link}
+                target="_blank" 
+                rel="noopener noreferrer"
+                className={`group relative aspect-[9/16] bg-[#141f36] overflow-hidden cursor-pointer block shadow-xl hover:shadow-2xl hover:shadow-[#c0a062]/20 transition-all duration-500 rounded-[2rem] sm:rounded-[2.5rem] border-[6px] border-white/40 ${index % 2 !== 0 ? 'md:mt-12' : ''}`}
+              >
+                <Image 
+                  src={video.image} 
+                  alt={video.title} 
+                  fill 
+                  className="object-cover opacity-90 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#141f36] via-[#141f36]/20 to-transparent opacity-90" />
+                <div className="absolute inset-0 flex items-center justify-center z-20">
+                  <div className="w-14 h-14 backdrop-blur-sm bg-white/10 rounded-full flex items-center justify-center border border-white/40 group-hover:bg-[#c0a062]/90 group-hover:border-[#c0a062] group-hover:shadow-[0_0_25px_rgba(192,160,98,0.5)] transition-all duration-500 transform group-hover:scale-110">
+                    <Play className="h-5 w-5 text-white ml-1" fill="currentColor" />
+                  </div>
+                </div>
+                <div className="absolute bottom-0 left-0 w-full p-5 sm:p-6 z-20 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+                  <h3 className="text-white font-serif text-base sm:text-lg leading-snug drop-shadow-md line-clamp-2">
+                    {video.title}
+                  </h3>
+                </div>
+              </a>
+            ))}
+            </div>
+        </div>
+      </section> 
 
 
       <section className="bg-[#141f36] border-b border-[#c0a062]/20 py-24 overflow-hidden">
@@ -379,9 +578,10 @@ export default async function Home() {
         </div>
       </section>
 
+
+
       <section className="py-24 sm:py-32 bg-[#e6e2d3]/30 overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6">
-          
           <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
             <div className="max-w-2xl">
               <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-medium text-[#141f36] leading-tight">
@@ -408,15 +608,12 @@ export default async function Home() {
                   fill 
                   className="object-cover opacity-90 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110" 
                 />
-                
                 <div className="absolute inset-0 bg-gradient-to-t from-[#141f36] via-[#141f36]/20 to-transparent opacity-90" />
-                
                 <div className="absolute inset-0 flex items-center justify-center z-20">
                   <div className="w-14 h-14 backdrop-blur-sm bg-white/10 rounded-full flex items-center justify-center border border-white/40 group-hover:bg-[#c0a062]/90 group-hover:border-[#c0a062] group-hover:shadow-[0_0_25px_rgba(192,160,98,0.5)] transition-all duration-500 transform group-hover:scale-110">
                     <Play className="h-5 w-5 text-white ml-1" fill="currentColor" />
                   </div>
                 </div>
-                
                 <div className="absolute bottom-0 left-0 w-full p-5 sm:p-6 z-20 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
                   <h3 className="text-white font-serif text-base sm:text-lg leading-snug drop-shadow-md line-clamp-2">
                     {video.title}
@@ -425,7 +622,6 @@ export default async function Home() {
               </a>
             ))}
             </div>
-          
         </div>
       </section> 
 
@@ -474,14 +670,11 @@ export default async function Home() {
       </div>
 
       <footer className="bg-[#141f36] text-[#f6f4ed] relative overflow-hidden border-t border-[#c0a062]/20">
-        
-        {/* Gradiente de fondo adaptativo */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] md:w-[800px] h-[300px] md:h-[400px] bg-[radial-gradient(ellipse_at_top,_rgba(192,160,98,0.05)_0%,_transparent_70%)] pointer-events-none" />
 
         <div className="container mx-auto px-4 sm:px-6 pt-16 md:pt-24 pb-8 md:pb-12">
           <div className="flex flex-col md:flex-row justify-center items-center md:items-start md:gap-16 lg:gap-24 relative z-10">
 
-            {/* COLUMNA 1: Colecciones */}
             <div className="flex-1 w-full text-center md:text-right mt-10 md:mt-24 order-2 md:order-1">
               <h4 className="font-medium mb-6 md:mb-8 text-[#c0a062] tracking-[0.3em] uppercase text-[10px] md:text-xs">Colecciones</h4>
               <ul className="space-y-4 md:space-y-5 text-sm md:text-base text-[#f6f4ed]/80 font-serif">
@@ -497,7 +690,6 @@ export default async function Home() {
               </ul>
             </div>
 
-            {/* COLUMNA 2: Logo y Marca (Centro) */}
             <div className="flex flex-col items-center order-1 md:order-2 shrink-0">
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-[#c0a062]/40 flex items-center justify-center mb-4 md:mb-6">
                 <div className="w-2 h-2 md:w-2.5 md:h-2.5 rotate-45 bg-[#c0a062]" />
@@ -506,12 +698,10 @@ export default async function Home() {
               <p className="text-sm md:text-base text-[#f6f4ed]/70 text-center max-w-[200px] md:max-w-[220px] font-serif italic mb-2 md:mb-6">
                 El arte de la alta perfumería.
               </p>
-              {/* MAGIA RESPONSIVE: Línea vertical en PC, línea horizontal sutil en móvil */}
               <div className="hidden md:block w-px h-32 sm:h-48 bg-gradient-to-b from-[#c0a062]/60 via-[#c0a062]/20 to-transparent" />
               <div className="md:hidden w-24 h-px mt-6 bg-gradient-to-r from-transparent via-[#c0a062]/40 to-transparent" />
             </div>
 
-            {/* COLUMNA 3: Servicio */}
             <div className="flex-1 w-full text-center md:text-left mt-10 md:mt-24 order-3 md:order-3">
               <h4 className="font-medium mb-6 md:mb-8 text-[#c0a062] tracking-[0.3em] uppercase text-[10px] md:text-xs">Servicio</h4>
               <ul className="space-y-4 md:space-y-5 text-sm md:text-base text-[#f6f4ed]/80 font-serif">
@@ -529,7 +719,6 @@ export default async function Home() {
 
           </div>
 
-          {/* Copyright */}
           <div className="mt-12 md:mt-16 text-[10px] md:text-xs text-[#f6f4ed]/50 flex flex-col items-center gap-2 md:gap-3 uppercase tracking-widest relative z-10">
             <div className="w-full max-w-[200px] md:max-w-lg h-px bg-gradient-to-r from-transparent via-[#c0a062]/40 to-transparent mb-4 md:mb-6" />
             <p className="hover:text-[#c0a062] transition-colors">&copy; 2026 MOR PERFUMES.</p>

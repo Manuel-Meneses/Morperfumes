@@ -18,7 +18,6 @@ export default function CartPage() {
   const [isApplying, setIsApplying] = useState(false)
   const { toast } = useToast()
 
-  // Cupones de ejemplo adaptados
   const coupons = {
     "MOR10": 10,
     "HERENCIA": 15,
@@ -53,10 +52,8 @@ export default function CartPage() {
   const discountAmount = appliedCoupon ? (total * appliedCoupon.discount) / 100 : 0
   const subtotalAfterDiscount = total - discountAmount
   
-  // Lógica de envío de Mor Perfumes
   const envioGratis = subtotalAfterDiscount >= 100000
 
-  // Generador del link de WhatsApp
   const generarEnlaceWhatsApp = () => {
     const numeroWA = "5493516087006"
     let mensaje = "¡Hola León e Indio! Quiero realizar el siguiente pedido:\n\n"
@@ -119,54 +116,76 @@ export default function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-            {items.map((item) => (
-              <div key={`${item.id}-${item.size}`} className="flex gap-4 sm:gap-6 pb-6 sm:pb-8 border-b border-[#141f36]/10">
-                {/* Product Image */}
-                <div className="relative w-24 h-32 sm:w-28 sm:h-40 bg-[#e6e2d3] flex-shrink-0 overflow-hidden border border-[#141f36]/10 p-2">
-                  <Image src={item.image || "/placeholder.svg"} alt={item.name} fill className="object-cover p-3" />
-                </div>
+            {items.map((item) => {
+              // MAGIA ACÁ: Separamos el string en un array de imágenes
+              const imageUrls = item.image ? item.image.split(',') : [];
 
-                {/* Product Details */}
-                <div className="flex-1 min-w-0 flex flex-col">
-                  <div className="flex justify-between gap-2 sm:gap-4 mb-2">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-serif text-lg sm:text-xl font-medium text-[#141f36] mb-1 truncate">{item.name}</h3>
-                      <p className="text-sm text-[#4a5d4e] uppercase tracking-wider mb-2">{item.size}</p>
-                    </div>
-                    <button
-                      onClick={() => removeItem(item.id, item.size)}
-                      className="text-[#141f36]/40 hover:text-[#991b1b] transition-colors flex-shrink-0"
-                    >
-                      <X className="h-5 w-5" />
-                      <span className="sr-only">Eliminar esencia</span>
-                    </button>
+              return (
+                <div key={`${item.id}-${item.size}`} className="flex gap-4 sm:gap-6 pb-6 sm:pb-8 border-b border-[#141f36]/10">
+                  
+                  {/* MINI-COLLAGE EN EL CARRITO */}
+                  <div className="relative w-24 h-32 sm:w-28 sm:h-40 bg-[#e6e2d3] flex-shrink-0 overflow-hidden border border-[#141f36]/10 p-2 flex items-center justify-center">
+                    {imageUrls.length === 0 && (
+                      <Image src="/placeholder.svg" alt={item.name} fill className="object-cover p-3" />
+                    )}
+                    {imageUrls.length === 1 && (
+                      <Image src={imageUrls[0]} alt={item.name} fill className="object-contain p-2" />
+                    )}
+                    {imageUrls.length === 2 && (
+                      <>
+                        <div className="absolute left-2 top-1/2 -translate-y-1/2 w-[60%] h-[80%] z-10"><Image src={imageUrls[0]} alt="P1" fill className="object-contain drop-shadow-md" /></div>
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 w-[55%] h-[75%] z-0"><Image src={imageUrls[1]} alt="P2" fill className="object-contain opacity-80" /></div>
+                      </>
+                    )}
+                    {imageUrls.length >= 3 && (
+                      <>
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[45%] h-[65%] z-0"><Image src={imageUrls[1]} alt="P2" fill className="object-contain opacity-80" /></div>
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[45%] h-[65%] z-0"><Image src={imageUrls[2]} alt="P3" fill className="object-contain opacity-80" /></div>
+                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[85%] z-10"><Image src={imageUrls[0]} alt="P1" fill className="object-contain drop-shadow-lg" /></div>
+                      </>
+                    )}
                   </div>
 
-                  <div className="flex items-end justify-between mt-auto">
-                    {/* Quantity Controls */}
-                    <div className="flex items-center gap-3 border border-[#141f36]/20 bg-white/50">
+                  {/* Product Details */}
+                  <div className="flex-1 min-w-0 flex flex-col">
+                    <div className="flex justify-between gap-2 sm:gap-4 mb-2">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-serif text-lg sm:text-xl font-medium text-[#141f36] mb-1 truncate">{item.name}</h3>
+                        <p className="text-xs text-[#4a5d4e] uppercase tracking-wider mb-2 leading-relaxed">{item.size}</p>
+                      </div>
                       <button
-                        onClick={() => updateQuantity(item.id, item.size, item.quantity - 1)}
-                        className="px-3 py-2 hover:bg-[#141f36]/5 transition-colors text-[#141f36]"
+                        onClick={() => removeItem(item.id, item.size)}
+                        className="text-[#141f36]/40 hover:text-[#991b1b] transition-colors flex-shrink-0"
                       >
-                        <Minus className="h-4 w-4" />
-                      </button>
-                      <span className="w-8 text-center text-sm font-medium text-[#141f36]">{item.quantity}</span>
-                      <button
-                        onClick={() => updateQuantity(item.id, item.size, item.quantity + 1)}
-                        className="px-3 py-2 hover:bg-[#141f36]/5 transition-colors text-[#141f36]"
-                      >
-                        <Plus className="h-4 w-4" />
+                        <X className="h-5 w-5" />
+                        <span className="sr-only">Eliminar esencia</span>
                       </button>
                     </div>
-                    {/* Price */}
-                    <p className="font-medium text-lg text-[#141f36]">
-                      ${(item.price * item.quantity).toLocaleString("es-AR")}
-                    </p>
+
+                    <div className="flex items-end justify-between mt-auto">
+                      <div className="flex items-center gap-3 border border-[#141f36]/20 bg-white/50">
+                        <button
+                          onClick={() => updateQuantity(item.id, item.size, item.quantity - 1)}
+                          className="px-3 py-2 hover:bg-[#141f36]/5 transition-colors text-[#141f36]"
+                        >
+                          <Minus className="h-4 w-4" />
+                        </button>
+                        <span className="w-8 text-center text-sm font-medium text-[#141f36]">{item.quantity}</span>
+                        <button
+                          onClick={() => updateQuantity(item.id, item.size, item.quantity + 1)}
+                          className="px-3 py-2 hover:bg-[#141f36]/5 transition-colors text-[#141f36]"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <p className="font-medium text-lg text-[#141f36]">
+                        ${(item.price * item.quantity).toLocaleString("es-AR")}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Order Summary */}
@@ -174,7 +193,6 @@ export default function CartPage() {
             <div className="border border-[#141f36]/10 bg-white/50 p-6 sm:p-8 lg:sticky lg:top-24 rounded-none shadow-sm">
               <h2 className="font-serif text-2xl font-semibold mb-6 text-[#141f36]">Resumen del Pedido</h2>
 
-              {/* Sistema de Cupones */}
               <div className="mb-6 pb-6 border-b border-[#141f36]/10">
                 <Label htmlFor="coupon" className="text-sm font-medium mb-3 block text-[#141f36]">
                   Código de Descuento
@@ -186,10 +204,7 @@ export default function CartPage() {
                       <span className="text-sm font-medium text-[#141f36]">{appliedCoupon.code}</span>
                       <span className="text-xs text-[#141f36]/60">-{appliedCoupon.discount}%</span>
                     </div>
-                    <button
-                      onClick={handleRemoveCoupon}
-                      className="text-xs text-[#991b1b]/70 hover:text-[#991b1b]"
-                    >
+                    <button onClick={handleRemoveCoupon} className="text-xs text-[#991b1b]/70 hover:text-[#991b1b]">
                       Quitar
                     </button>
                   </div>
@@ -215,7 +230,6 @@ export default function CartPage() {
                 )}
               </div>
 
-              {/* Totales */}
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between text-sm text-[#141f36]/80">
                   <span>Subtotal</span>
@@ -242,14 +256,12 @@ export default function CartPage() {
                 </div>
               </div>
 
-              {/* Mensaje de envío gratis */}
               {!envioGratis && (
                 <p className="text-xs text-[#4a5d4e] mb-6 text-center font-medium bg-[#4a5d4e]/10 p-2">
                   Agregá ${(100000 - subtotalAfterDiscount).toLocaleString("es-AR")} más para obtener envío gratis.
                 </p>
               )}
 
-              {/* Botón Mágico hacia WhatsApp */}
               <Button asChild size="lg" className="w-full h-14 text-base mb-3 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-none border-none shadow-lg transition-colors">
                 <a href={generarEnlaceWhatsApp()} target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="h-5 w-5 mr-2" />
@@ -257,12 +269,7 @@ export default function CartPage() {
                 </a>
               </Button>
 
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="w-full h-12 text-sm bg-transparent border-[#141f36]/20 text-[#141f36] rounded-none hover:bg-[#141f36]/5"
-              >
+              <Button asChild variant="outline" size="lg" className="w-full h-12 text-sm bg-transparent border-[#141f36]/20 text-[#141f36] rounded-none hover:bg-[#141f36]/5">
                 <Link href="/shop">Agregar más fragancias</Link>
               </Button>
             </div>

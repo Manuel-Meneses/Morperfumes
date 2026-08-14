@@ -3,7 +3,6 @@
 import { Truck } from "lucide-react"
 
 export function ShippingTicker() {
-  // Textos extraídos de las políticas de Mor Perfumes
   const messages = [
     "ENVÍO GRATIS A PARTIR DE $100.000", 
     "100% ORIGINALES", 
@@ -12,16 +11,17 @@ export function ShippingTicker() {
   ]
 
   return (
-    <div className="sticky top-0 z-50 bg-foreground text-background py-1.5 overflow-hidden">
+    // Ya no es sticky, ahora es un bloque normal con colores premium
+    <div className="bg-[#141f36] text-[#fff] py-2 overflow-hidden border-b border-[#c0a062]/20">
       <div className="flex gap-8">
         {/* First set for infinite scroll */}
         <div className="flex items-center gap-8 whitespace-nowrap animate-marquee-infinite">
           {messages.map((message, index) => (
             <span
               key={`set1-${index}`}
-              className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-medium uppercase tracking-wide"
+              className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest"
             >
-              <Truck className="h-3 w-3" />
+              <Truck className="h-3.5 w-3.5" />
               {message}
             </span>
           ))}
@@ -31,9 +31,9 @@ export function ShippingTicker() {
           {messages.map((message, index) => (
             <span
               key={`set2-${index}`}
-              className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-medium uppercase tracking-wide"
+              className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest"
             >
-              <Truck className="h-3 w-3" />
+              <Truck className="h-3.5 w-3.5" />
               {message}
             </span>
           ))}
@@ -43,9 +43,9 @@ export function ShippingTicker() {
           {messages.map((message, index) => (
             <span
               key={`set3-${index}`}
-              className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-medium uppercase tracking-wide"
+              className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest"
             >
-              <Truck className="h-3 w-3" />
+              <Truck className="h-3.5 w-3.5" />
               {message}
             </span>
           ))}
