@@ -1,11 +1,23 @@
+"use client"
+
+import { usePathname, useSearchParams } from "next/navigation"
 import { ProductCard, type Product } from "./product-card"
 
 interface ProductGridProps {
   products: Product[]
-  layout?: "slider" | "grid" // Agregamos la opción de elegir el diseño
+  layout?: "slider" | "grid"
 }
 
 export function ProductGrid({ products, layout = "slider" }: ProductGridProps) {
+  // 🏆 LÓGICA DE URL DE RETORNO 🏆
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  
+  // Guardamos la URL actual exacta para que la tarjeta sepa de dónde venimos
+  const currentParams = searchParams.toString()
+  const fromUrl = currentParams ? `${pathname}?${currentParams}` : pathname
+  const encodedFrom = encodeURIComponent(fromUrl)
+
   // Modo Portada: Slider horizontal
   if (layout === "slider") {
     return (
@@ -13,7 +25,8 @@ export function ProductGrid({ products, layout = "slider" }: ProductGridProps) {
         <div className="grid grid-flow-col auto-cols-[85vw] sm:auto-cols-[280px] lg:auto-cols-[300px] gap-4 sm:gap-6 overflow-x-auto snap-x snap-mandatory overscroll-x-contain pb-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {products.map((product) => (
             <div key={product.id} className="snap-start w-full">
-              <ProductCard product={product} />
+              {/* Le pasamos el secreto "returnUrl" a la tarjeta */}
+              <ProductCard product={product} returnUrl={encodedFrom} />
             </div>
           ))}
         </div>
@@ -25,7 +38,7 @@ export function ProductGrid({ products, layout = "slider" }: ProductGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
+        <ProductCard key={product.id} product={product} returnUrl={encodedFrom} />
       ))}
     </div>
   )

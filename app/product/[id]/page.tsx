@@ -1,9 +1,9 @@
 "use client"
 
-import { useEffect, useState, use } from "react"
+import { useEffect, useState, use, Suspense } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { notFound } from "next/navigation"
+import { notFound, useRouter, useSearchParams } from "next/navigation"
 import { ArrowLeft, ShoppingBag, Droplets, Sparkles, Wind, Clock, SunMoon, Star, MessageCircle } from "lucide-react"
 import { Header } from "@/components/header"
 import { Button } from "@/components/ui/button"
@@ -11,10 +11,11 @@ import { getProducts, Product } from "@/lib/api"
 import { useCart } from "@/components/cart-provider"
 import { useToast } from "@/hooks/use-toast"
 
-export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params)
-  const productId = resolvedParams.id
-
+// Convertimos tu componente principal en "ProductContent" para poder envolverlo después
+function ProductContent({ productId }: { productId: string }) {
+  const router = useRouter()
+  const searchParams = useSearchParams() // Para leer la URL secreta
+  
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedSize, setSelectedSize] = useState<string>("")
@@ -37,6 +38,25 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     }
     loadProduct()
   }, [productId])
+
+  // 🏆 EL BOTÓN DE VOLVER DEFINITIVO 🏆
+  const handleGoBack = (e: React.MouseEvent) => {
+    e.preventDefault()
+    const from = searchParams.get("from")
+    
+    // Si el navegador tiene memoria de que estuvimos haciendo scroll, la flecha nativa es dios.
+    if (window.history.length > 2) {
+      window.history.back()
+    } 
+    // Si no tiene memoria (lo abrió en pestaña nueva) pero tenemos la URL secreta, lo mandamos ahí.
+    else if (from) {
+      router.push(from)
+    } 
+    // Si fallan los dos métodos anteriores, lo mandamos al catálogo de cero para que no se quede trabado.
+    else {
+      router.push("/shop")
+    }
+  }
 
   if (loading) {
     return (
@@ -64,7 +84,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const olfactoryNotes = product.details.filter(d => d.includes("Notas de"))
   const technicalSpecs = product.details.filter(d => !d.includes("Notas de") && d.includes(":"))
 
-  // EXTRACCIÓN INTELIGENTE PARA LOS MEDIDORES INMERSIVOS
   const getSpec = (keyword: string) => {
     const found = technicalSpecs.find(s => parseDetail(s).label.toLowerCase().includes(keyword))
     return found ? parseDetail(found).value : null
@@ -74,13 +93,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const duracion = getSpec("duración") || getSpec("longevidad")
   const ocasion = getSpec("ocasión") || getSpec("uso")
 
-  // Filtramos las specs que ya usamos en los medidores para no repetirlas
-  const otherSpecs = technicalSpecs.filter(s => {
-    const l = parseDetail(s).label.toLowerCase()
-    return !l.includes("estela") && !l.includes("proyección") && !l.includes("duración") && !l.includes("longevidad") && !l.includes("ocasión") && !l.includes("uso")
-  })
-
-  // Función para calcular el ancho de las barras visuales según el texto
   const getMeterWidth = (val: string | null) => {
     if (!val) return "w-[50%]"
     const v = val.toLowerCase()
@@ -105,7 +117,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     })
   }
 
-  // ENLACES
   const numeroWA = "5493516087006"
   const mensajeWA = `¡Hola León e Indio! Quiero consultar por el perfume ${product.name} en formato ${selectedSize} ($${currentPrice.toLocaleString("es-AR")}). ¿Tienen stock?`
   const linkWA = `https://wa.me/${numeroWA}?text=${encodeURIComponent(mensajeWA)}`
@@ -116,24 +127,21 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       <Header />
 
       <main className="container mx-auto px-4 sm:px-6 py-8 md:py-12">
-        <Button variant="ghost" asChild className="hover:bg-[#141f36]/5 text-[#141f36] mb-6 -ml-4">
-          <Link href="/shop">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Volver al catálogo
-          </Link>
+        
+        {/* BOTÓN REEMPLAZADO */}
+        <Button variant="ghost" onClick={handleGoBack} className="hover:bg-[#141f36]/5 text-[#141f36] mb-6 -ml-4 flex items-center cursor-pointer">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Volver al catálogo
         </Button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
           
-          {/* COLUMNA IZQUIERDA: Imagen Inmersiva */}
           <div className="relative aspect-[4/5] bg-white border border-[#141f36]/10 shadow-2xl p-8 group flex items-center justify-center">
-            {/* Marcos esquineros */}
             <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-[#c0a062]/70 transition-transform duration-700 group-hover:-translate-x-1 group-hover:-translate-y-1" />
             <div className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-[#c0a062]/70 transition-transform duration-700 group-hover:translate-x-1 group-hover:-translate-y-1" />
             <div className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-[#c0a062]/70 transition-transform duration-700 group-hover:-translate-x-1 group-hover:translate-y-1" />
             <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-[#c0a062]/70 transition-transform duration-700 group-hover:translate-x-1 group-hover:translate-y-1" />
             
-            {/* Etiqueta de Categoría */}
             <div className="absolute top-8 left-8 bg-[#141f36] text-[#f6f4ed] px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest z-20 shadow-md">
               {product.category}
             </div>
@@ -147,10 +155,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             />
           </div>
 
-          {/* COLUMNA DERECHA: Información y Controles */}
           <div className="flex flex-col justify-center">
             
-            {/* Cabecera */}
             <div className="mb-8 border-b border-[#141f36]/10 pb-8">
               {product.availability === "encargo" && (
                 <span className="inline-block bg-[#c0a062] text-[#141f36] text-[10px] font-bold px-2 py-1 uppercase tracking-widest mb-4">
@@ -173,7 +179,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               </div>
             </div>
 
-            {/* Selector de Tamaños */}
             <div className="mb-8">
               <h3 className="text-xs font-bold tracking-[0.2em] uppercase text-[#141f36] mb-4 flex items-center gap-2">
                 <Droplets className="w-4 h-4 text-[#c0a062]" />
@@ -196,7 +201,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               </div>
             </div>
 
-            {/* Botones de Acción */}
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
               <Button
                 size="lg"
@@ -215,10 +219,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               </Button>
             </div>
 
-            {/* BLOQUE INMERSIVO: La Ciencia del Perfume */}
             <div className="space-y-8 bg-white/50 p-6 md:p-8 border border-[#141f36]/10 shadow-sm">
               
-              {/* Descripción */}
               {product.description && (
                 <div>
                   <p className="font-serif text-[#141f36]/80 leading-relaxed text-sm">
@@ -227,7 +229,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 </div>
               )}
 
-              {/* Pirámide Olfativa Inmersiva */}
               {olfactoryNotes.length > 0 && (
                 <div className="pt-6 border-t border-[#141f36]/10">
                   <h3 className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#141f36] mb-6">
@@ -256,7 +257,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 </div>
               )}
 
-              {/* Medidores de Rendimiento Dinámicos */}
               {(estela || duracion) && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-6 border-t border-[#141f36]/10">
                   {estela && (
@@ -284,7 +284,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 </div>
               )}
 
-              {/* Otras especificaciones (residuales) y Fragrantica */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-6 border-t border-[#141f36]/10 gap-4">
                 <div className="flex items-center gap-3 text-[#141f36] text-sm font-serif italic">
                   <SunMoon className="w-5 h-5 text-[#c0a062]" />
@@ -306,5 +305,15 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         </div>
       </main>
     </div>
+  )
+}
+
+// 🏆 ENVOLVEMOS EL COMPONENTE EN SUSPENSE PARA QUE NEXT.JS NOS DEJE LEER LA URL 🏆
+export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params)
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#f6f4ed]"></div>}>
+      <ProductContent productId={resolvedParams.id} />
+    </Suspense>
   )
 }
