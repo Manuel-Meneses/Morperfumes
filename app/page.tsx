@@ -24,9 +24,9 @@ async function getTikTokInfo(url: string) {
 export default async function Home() {
   const allProducts = await getProducts()
   
-  // TRAEMOS LOS COMBOS PARA EL EFECTO CAJA
+// TRAEMOS LOS COMBOS PARA EL EFECTO CAJA
   const allCombos = await getCombos()
-  const featuredCombos = allCombos.slice(0, 3) 
+  const featuredCombos = allCombos // 👈 AHORA SÍ PASAN TODOS LOS DEL EXCEL
   
   // 1. LOGICA SELECCIÓN DEL MES
   let perfumesDestacados = allProducts.filter(p => (p as any).isFeatured === true)
@@ -276,12 +276,13 @@ export default async function Home() {
         </div>
       </section>
 
-            {/* =======================================================
-          SECCIÓN NUEVA: COMBOS & COFFRETS (Efecto "Caja 3D" INTERACTIVA)
+{/* =======================================================
+          SECCIÓN NUEVA: COMBOS & COFFRETS (Efecto Slider + Botón Ver Todo)
           ======================================================= */}
       {featuredCombos.length > 0 && (
         <section className="py-24 sm:py-32 bg-[#141f36] relative overflow-hidden border-t border-[#c0a062]/20">
           
+          {/* Fondo */}
           <div className="absolute inset-0 w-full h-full z-0">
             <Image
               src="/fondo_combos.jpg" 
@@ -294,15 +295,46 @@ export default async function Home() {
 
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[400px] bg-[radial-gradient(ellipse_at_top,_rgba(192,160,98,0.1)_0%,_transparent_70%)] pointer-events-none z-0" />
 
-          <div className="mt-16 w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-0">
-              <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-12 md:overflow-visible md:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                {featuredCombos.map(combo => (
-                  <div key={combo.id} className="min-w-[85vw] sm:min-w-[350px] snap-center md:min-w-0 md:w-auto">
-                    <InteractiveComboCard combo={combo}/>
-                  </div>
-                ))}
-              </div>
+          <div className="relative z-10 w-full">
+            {/* Títulos */}
+            <div className="container mx-auto px-4 sm:px-6 text-center mb-10 sm:mb-16">
+               <span className="text-[#c0a062] font-bold tracking-[0.3em] uppercase text-xs mb-3 block">El Regalo Perfecto</span>
+               <h2 className="font-serif text-4xl sm:text-5xl font-medium text-[#f6f4ed] mb-6 drop-shadow-md">
+                 Combos Imperdibles
+               </h2>
+               <div className="h-px w-16 bg-[#c0a062] mx-auto mb-6" />
             </div>
+
+            {/* Texto animado "Deslizá" igual que en los perfumes */}
+            <div className="flex justify-end px-6 sm:px-12 md:px-24 mb-4 text-[#c0a062] text-xs uppercase tracking-widest font-bold">
+              <span className="animate-pulse flex items-center gap-2">
+                Deslizá para explorar <ArrowRight className="h-3.5 w-3.5"/>
+              </span>
+            </div>
+
+            {/* SLIDER SUAVE Y OPTIMIZADO */}
+            <div className="flex overflow-x-auto snap-x snap-proximity scroll-smooth gap-6 sm:gap-8 px-6 sm:px-12 md:px-24 pb-8 w-full [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-[#141f36] [&::-webkit-scrollbar-thumb]:bg-[#c0a062]/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#c0a062] transition-colors">
+              {/* Le ponemos slice(0, 6) para que en el Home muestre máximo 6 combos. Así no se hace infinito */}
+              {featuredCombos.slice(0, 6).map(combo => (
+                <div key={combo.id} className="min-w-[85vw] sm:min-w-[350px] snap-center shrink-0">
+                  <InteractiveComboCard combo={combo}/>
+                </div>
+              ))}
+            </div>
+
+            {/* BOTÓN "VER COLECCIÓN COMPLETA" (Solo aparece si hay más de 3 combos en total) */}
+            {featuredCombos.length > 3 && (
+              <div className="flex justify-center mt-12 relative z-20 px-4">
+                <Link 
+                  href="/combos" 
+                  className="group flex items-center gap-3 bg-transparent border border-[#c0a062] text-[#c0a062] hover:bg-[#c0a062] hover:text-[#141f36] text-xs sm:text-sm font-bold py-4 px-8 uppercase tracking-[0.2em] transition-all duration-300 rounded-none shadow-[0_0_15px_rgba(192,160,98,0.1)] hover:shadow-[0_0_20px_rgba(192,160,98,0.4)]"
+                >
+                  Ver Colección Completa
+                  <ArrowRight className="w-4 h-4 transform transition-transform group-hover:translate-x-1" />
+                </Link>
+              </div>
+            )}
+          </div>
         </section>
       )}
 

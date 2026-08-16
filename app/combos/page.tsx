@@ -13,12 +13,10 @@ const WaterParticles = () => (
     <style>{`
       .droplet {
         position: absolute;
-        /* El difuminado ahora lo hace el gradiente, NO un filtro CSS. Consume 0 recursos. */
         background: radial-gradient(ellipse at center, rgba(192,160,98,0.4) 0%, rgba(192,160,98,0) 70%);
         border-radius: 50%;
         animation: float-up infinite ease-in-out;
         opacity: 0;
-        /* Hardware acceleration para la animación de caída */
         will-change: transform, opacity;
       }
       @keyframes float-up {
@@ -65,18 +63,14 @@ const Vitrina = ({ children, subtitle, isLight }: { children: React.ReactNode, s
         </p>
       </div>
       
-      {/* 
-        CAJA OPTIMIZADA: 
-        1. Eliminado 'backdrop-blur-md'.
-        2. Usamos colores de fondo sólidos imitando sombras para que Chrome no tenga que procesar capas transparentes. 
-      */}
+      {/* CAJA OPTIMIZADA */}
       <div className={`relative sm:rounded-t-3xl border-t border-b sm:border p-0 pt-8 sm:p-12 md:p-16 ${
         isLight 
           ? "border-[#141f36]/10 bg-[#f6f4ed] sm:bg-gradient-to-b from-[#ffffff] to-[#f6f4ed] sm:shadow-xl" 
           : "border-[#c0a062]/30 bg-[#141f36] sm:bg-gradient-to-b from-[#1a2640] to-[#141f36] sm:shadow-[0_30px_60px_rgba(0,0,0,0.8)]"
       }`}>
         
-        {/* Luces LED superiores (Sin el blur-[3px] asesino) */}
+        {/* Luces LED superiores */}
         <div className={`absolute top-0 left-[10%] right-[10%] h-[2px] opacity-60 ${isLight ? "bg-gradient-to-r from-transparent via-[#c0a062] to-transparent" : "bg-gradient-to-r from-transparent via-[#c0a062] to-transparent"}`} />
         <div className={`absolute top-0 left-[20%] right-[20%] h-[1px] opacity-100 ${isLight ? "bg-gradient-to-r from-transparent via-[#141f36]/20 to-transparent" : "bg-gradient-to-r from-transparent via-[#f6f4ed] to-transparent"}`} />
 
@@ -84,8 +78,11 @@ const Vitrina = ({ children, subtitle, isLight }: { children: React.ReactNode, s
         <div className={`hidden sm:block absolute top-0 bottom-0 left-0 w-[1px] ${isLight ? "bg-gradient-to-b from-[#141f36]/10 to-transparent" : "bg-gradient-to-b from-[#c0a062]/40 to-transparent"}`} />
         <div className={`hidden sm:block absolute top-0 bottom-0 right-0 w-[1px] ${isLight ? "bg-gradient-to-b from-[#141f36]/10 to-transparent" : "bg-gradient-to-b from-[#c0a062]/40 to-transparent"}`} />
 
-        {/* INTERIOR DE LA VITRINA: Agregado 'transform-gpu' para usar aceleración por hardware */}
-        <div className="relative z-10 flex overflow-x-auto snap-x snap-proximity scroll-smooth gap-6 pb-12 px-4 sm:px-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-12 md:overflow-visible md:pb-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] transform-gpu">
+        {/* 
+            SOLUCIÓN DEL MODAL ACÁ ABAJO: 
+            Quitamos el 'transform-gpu' de este contenedor para que no atrape al modal fijo de la tarjeta.
+        */}
+        <div className="relative z-10 flex overflow-x-auto snap-x snap-proximity scroll-smooth gap-6 pb-12 px-4 sm:px-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-12 md:overflow-visible md:pb-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {children}
         </div>
       </div>
@@ -172,7 +169,7 @@ export default async function CombosPage() {
               isLight={isLight}
             >
               {section.data.map((combo) => (
-                <div key={combo.id} className="min-w-[85vw] sm:min-w-[350px] snap-center md:min-w-0 md:w-auto transform-gpu">
+                <div key={combo.id} className="min-w-[85vw] sm:min-w-[350px] snap-center md:min-w-0 md:w-auto">
                   <InteractiveComboCard combo={combo} />
                 </div>
               ))}

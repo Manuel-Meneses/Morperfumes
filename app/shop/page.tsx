@@ -6,52 +6,115 @@ import { Header } from "@/components/header"
 import { ProductGrid } from "@/components/product-grid"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { ArrowLeft, SlidersHorizontal, Search, DollarSign, ChevronDown, ChevronLeft, ChevronRight, Filter, Users } from "lucide-react"
+import { SlidersHorizontal, Search, DollarSign, ChevronDown, ChevronLeft, ChevronRight, Filter, Users } from "lucide-react"
 import { getProducts, Product } from "@/lib/api"
 
 const ITEMS_PER_PAGE = 12
+
+// CACHÉ EN MEMORIA: Evita la pantalla de carga al volver atrás
+let cachedProducts: Product[] | null = null;
 
 function ShopContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
   
-  // Leemos la categoría y la PÁGINA directamente de la URL
   const categoryParam = searchParams.get("category") || "sellados"
   const pageParam = parseInt(searchParams.get("page") || "1", 10)
+  const qParam = searchParams.get("q") || ""
+  const priceParam = searchParams.get("price") || "all"
+  const genderParam = searchParams.get("gender") || "all"
+  const designerParam = searchParams.get("designer") === "true"
 
-  const [allProducts, setAllProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
+  const [allProducts, setAllProducts] = useState<Product[]>(cachedProducts || [])
+  const [loading, setLoading] = useState(cachedProducts === null)
   
-  const [searchQuery, setSearchQuery] = useState("")
-  const [priceFilter, setPriceFilter] = useState("all")
-  const [genderFilter, setGenderFilter] = useState("all")
-  const [designerFirst, setDesignerFirst] = useState(false) 
+  const [searchQuery, setSearchQuery] = useState(qParam)
+  const [priceFilter, setPriceFilter] = useState(priceParam)
+  const [genderFilter, setGenderFilter] = useState(genderParam)
+  const [designerFirst, setDesignerFirst] = useState(designerParam) 
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(true) 
-  
-  // El estado interno de la página ahora se sincroniza con la URL
   const [currentPage, setCurrentPage] = useState(pageParam)
 
+  // Carga inicial
   useEffect(() => {
+    if (cachedProducts) return; 
+
     async function load() {
       const prods = await getProducts()
+      cachedProducts = prods; 
       setAllProducts(prods)
       setLoading(false)
     }
     load()
   }, [])
 
-  // Sincronizar cambios en los filtros con la página 1, pero sin borrar la URL base
+  // 🏆 EL GRAN FIX DEL BOTÓN ATRÁS 🏆
+  // Cuando el usuario toca "Atrás", la URL cambia. Este código lee la URL vieja 
+  // y restaura los filtros y la página exacta sin perder la posición del scroll.
+  // (Eliminé el código anterior que forzaba el reinicio a la página 1).
   useEffect(() => {
-    setCurrentPage(1)
-  }, [categoryParam, searchQuery, priceFilter, genderFilter, designerFirst])
+    setCurrentPage(pageParam)
+    setSearchQuery(qParam)
+    setPriceFilter(priceParam)
+    setGenderFilter(genderParam)
+    setDesignerFirst(designerParam)
+  }, [pageParam, qParam, priceParam, genderParam, designerParam])
 
-  // Lógica para actualizar la URL sin recargar la página cuando cambia de página
+  // Lógica del buscador
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      const params = new URLSearchParams(window.location.search)
+      const currentQ = params.get("q") || ""
+      
+      if (searchQuery !== currentQ) {
+        if (searchQuery) params.set("q", searchQuery)
+        else params.delete("q")
+        
+        params.set("page", "1")
+        router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+      }
+    }, 400)
+    return () => clearTimeout(handler)
+  }, [searchQuery, pathname, router])
+
+  const handleGenderChange = (val: string) => {
+    const params = new URLSearchParams(window.location.search)
+    if (val !== "all") params.set("gender", val)
+    else params.delete("gender")
+    
+    params.set("page", "1")
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+  }
+
+  const handlePriceChange = (val: string) => {
+    const params = new URLSearchParams(window.location.search)
+    if (val !== "all") params.set("price", val)
+    else params.delete("price")
+    
+    params.set("page", "1")
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+  }
+
+  const handleDesignerChange = (val: boolean) => {
+    const params = new URLSearchParams(window.location.search)
+    if (val) params.set("designer", "true")
+    else params.delete("designer")
+    
+    params.delete("price") // Reset del precio porque cambian los rangos
+    params.set("page", "1")
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+  }
+
   const changePage = (newPage: number) => {
-    setCurrentPage(newPage)
-    const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams(window.location.search)
     params.set("page", newPage.toString())
-    router.push(`${pathname}?${params.toString()}`, { scroll: true })
+    // Al cambiar de página voluntariamente, lo subimos suavemente (scroll: true)
+    router.push(`${pathname}?${params.toString()}`, { scroll: true }) 
+  }
+
+  const handleCategoryChange = (catId: string) => {
+    router.push(`/shop?category=${catId}&page=1`, { scroll: false })
   }
 
   const normalize = (str: string) => {
@@ -139,21 +202,14 @@ function ShopContent() {
     }
   })
 
-  // 3. PAGINACIÓN
+  // 3. PAGINACIÓN SEGURO
   const totalPages = Math.ceil(sortedProducts.length / ITEMS_PER_PAGE)
-  
-  // Si la url dice "página 5" pero al filtrar solo hay 2 páginas, lo forzamos a la 1 para no mostrar vacío.
   const validCurrentPage = currentPage > totalPages ? 1 : Math.max(1, currentPage)
 
   const currentProducts = sortedProducts.slice(
     (validCurrentPage - 1) * ITEMS_PER_PAGE,
     validCurrentPage * ITEMS_PER_PAGE
   )
-
-  const handleCategoryChange = (catId: string) => {
-    // Al cambiar de categoría, volvemos a la página 1 y actualizamos la URL
-    router.push(`/shop?category=${catId}&page=1`, { scroll: false })
-  }
 
   const tabs = [
     { id: "sellados", label: "Sellados", subtitle: "Árabes & Diseñador" },
@@ -229,12 +285,11 @@ function ShopContent() {
         {showAdvancedFilters && (
           <div className="bg-white border border-[#141f36]/5 p-4 md:p-6 mb-8 md:mb-10 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
             
-            {/* SWITCH DE PRIORIDAD */}
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 md:mb-8 pb-6 md:pb-8 border-b border-[#141f36]/10 gap-4">
               <span className="text-[9px] md:text-xs font-bold uppercase tracking-widest text-[#141f36]">Configurar Escala</span>
               <div className="flex flex-row w-full md:w-auto p-1 bg-[#f6f4ed] border border-[#141f36]/10 rounded-sm">
                 <button 
-                  onClick={() => { setDesignerFirst(false); setPriceFilter("all"); }}
+                  onClick={() => handleDesignerChange(false)}
                   className={`flex-1 md:flex-none px-2 md:px-6 py-3 md:py-2.5 text-[8px] sm:text-[10px] md:text-xs font-bold uppercase tracking-[0.05em] md:tracking-widest transition-all text-center ${
                     !designerFirst ? 'bg-[#141f36] text-[#f6f4ed] shadow-md' : 'text-[#141f36]/50 hover:text-[#141f36]'
                   }`}
@@ -242,7 +297,7 @@ function ShopContent() {
                   Árabes
                 </button>
                 <button 
-                  onClick={() => { setDesignerFirst(true); setPriceFilter("all"); }}
+                  onClick={() => handleDesignerChange(true)}
                   className={`flex-1 md:flex-none px-2 md:px-6 py-3 md:py-2.5 text-[8px] sm:text-[10px] md:text-xs font-bold uppercase tracking-[0.05em] md:tracking-widest transition-all text-center ${
                     designerFirst ? 'bg-[#141f36] text-[#f6f4ed] shadow-md' : 'text-[#141f36]/50 hover:text-[#141f36]'
                   }`}
@@ -252,7 +307,6 @@ function ShopContent() {
               </div>
             </div>
 
-            {/* FILTROS DE BÚSQUEDA, GÉNERO Y PRECIO */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6">
               
               <div className="relative">
@@ -261,7 +315,7 @@ function ShopContent() {
                   type="text" 
                   placeholder="Buscar esencia..." 
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => setSearchQuery(e.target.value)} 
                   className="w-full pl-10 md:pl-12 pr-4 py-3 md:py-3 bg-transparent border border-[#141f36]/10 md:border-t-0 md:border-l-0 md:border-r-0 md:border-b md:border-[#141f36]/20 focus:outline-none focus:border-[#c0a062] transition-all font-serif text-base text-[#141f36] placeholder:text-[#141f36]/40 rounded-sm md:rounded-none"
                 />
               </div>
@@ -270,7 +324,7 @@ function ShopContent() {
                 <Users className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 h-3.5 w-3.5 md:h-4 md:w-4 text-[#141f36]/40" />
                 <select 
                   value={genderFilter}
-                  onChange={(e) => setGenderFilter(e.target.value)}
+                  onChange={(e) => handleGenderChange(e.target.value)}
                   className="w-full pl-10 md:pl-12 pr-8 md:pr-10 py-3 md:py-3 bg-transparent border border-[#141f36]/10 md:border-t-0 md:border-l-0 md:border-r-0 md:border-b md:border-[#141f36]/20 appearance-none focus:outline-none focus:border-[#c0a062] transition-all font-serif text-base text-[#141f36] cursor-pointer rounded-sm md:rounded-none"
                 >
                   <option value="all">Todos los Géneros</option>
@@ -287,7 +341,7 @@ function ShopContent() {
                 <DollarSign className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 h-3.5 w-3.5 md:h-4 md:w-4 text-[#141f36]/40" />
                 <select 
                   value={priceFilter}
-                  onChange={(e) => setPriceFilter(e.target.value)}
+                  onChange={(e) => handlePriceChange(e.target.value)}
                   className="w-full pl-10 md:pl-12 pr-8 md:pr-10 py-3 md:py-3 bg-transparent border border-[#141f36]/10 md:border-t-0 md:border-l-0 md:border-r-0 md:border-b md:border-[#141f36]/20 appearance-none focus:outline-none focus:border-[#c0a062] transition-all font-serif text-base text-[#141f36] cursor-pointer rounded-sm md:rounded-none"
                 >
                   <option value="all">Cualquier Precio</option>
@@ -314,12 +368,10 @@ function ShopContent() {
           </div>
         )}
 
-        {/* CONTENEDOR DE GRILLA SEGURO */}
         <div className="w-full overflow-hidden px-1">
           <ProductGrid products={currentProducts} layout="grid" />
         </div>
 
-        {/* Paginación - AHORA LLAMA A LA FUNCIÓN changePage() QUE ACTUALIZA LA URL */}
         {totalPages > 1 && (
           <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4 mt-12 md:mt-16 mb-8">
             <button
@@ -356,7 +408,6 @@ function ShopContent() {
           </div>
         )}
 
-        {/* Estado Vacío */}
         {sortedProducts.length === 0 && (
           <div className="text-center py-16 md:py-24 px-4 bg-white/50 border border-[#141f36]/5 mt-8 mx-2">
             <SlidersHorizontal className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-4 md:mb-6 text-[#141f36]/20" />
@@ -364,9 +415,10 @@ function ShopContent() {
             <Button 
               variant="outline" 
               onClick={() => { 
-                setSearchQuery(""); 
-                setPriceFilter("all"); 
-                setGenderFilter("all");
+                setSearchQuery("")
+                setPriceFilter("all")
+                setGenderFilter("all")
+                router.replace(pathname, { scroll: false })
               }}
               className="border-[#c0a062] text-[#c0a062] hover:bg-[#c0a062] hover:text-white uppercase tracking-widest text-[10px] font-bold rounded-none"
             >

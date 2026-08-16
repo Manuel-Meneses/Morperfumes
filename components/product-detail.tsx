@@ -2,10 +2,11 @@
 
 import { useState } from "react"
 import Image from "next/image"
+import { useRouter } from "next/navigation" 
 import { Button } from "./ui/button"
 import { useCart } from "./cart-provider"
 import { useToast } from "@/hooks/use-toast"
-import { Check, ShoppingBag, AlertCircle, MessageCircle } from "lucide-react"
+import { Check, ShoppingBag, AlertCircle, MessageCircle, ArrowLeft } from "lucide-react" 
 
 interface Product {
   id: string
@@ -20,6 +21,7 @@ interface Product {
 }
 
 export function ProductDetail({ product }: { product: Product }) {
+  const router = useRouter()
   const [selectedSize, setSelectedSize] = useState<string>("")
   const [isAdding, setIsAdding] = useState(false)
   const [showSizeError, setShowSizeError] = useState(false)
@@ -111,10 +113,34 @@ export function ProductDetail({ product }: { product: Product }) {
     window.open(`https://wa.me/${numeroWA}?text=${encodeURIComponent(mensaje)}`, '_blank')
   }
 
+  // 🏆 EL FIX DEFINITIVO 100% NATIVO 🏆
+  const handleGoBack = (e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    // Leemos de dónde vino el usuario usando document.referrer
+    // Si la URL de donde vino incluye nuestra web, significa que estaba navegando el catálogo.
+    if (document.referrer.includes(window.location.host)) {
+      // Usamos el botón 'Atrás' original del navegador (preserva el scroll impecablemente)
+      window.history.back();
+    } else {
+      // Si pegó el link del perfume directo en una pestaña nueva, lo mandamos al shop de cero
+      router.push('/shop');
+    }
+  }
+
   return (
     <div className="bg-[#f6f4ed] min-h-screen text-[#141f36]">
-      <div className="container mx-auto px-4 sm:px-6 py-8 md:py-16 max-w-[1400px]">
+      <div className="container mx-auto px-4 sm:px-6 py-8 md:py-12 max-w-[1400px]">
         
+        {/* BOTÓN INTELIGENTE: VOLVER ATRÁS */}
+        <button 
+          onClick={handleGoBack} 
+          className="group flex items-center gap-2 text-[#141f36]/60 hover:text-[#c0a062] font-bold uppercase tracking-widest text-[10px] sm:text-xs mb-8 transition-colors w-fit"
+        >
+          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+          Volver al Catálogo
+        </button>
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
           
           {/* Galería de Fotos */}
@@ -192,9 +218,8 @@ export function ProductDetail({ product }: { product: Product }) {
               </div>
             </div>
 
-            {/* BOTONERA DE COMPRA (TAMAÑO MAXIMIZADO PARA MÓVILES) */}
+            {/* BOTONERA DE COMPRA */}
             <div className="flex flex-col gap-4 mb-12">
-              {/* 1. Botón de Compra Web */}
               <Button
                 type="button"
                 onClick={handleAddToCart}
@@ -214,7 +239,6 @@ export function ProductDetail({ product }: { product: Product }) {
                 )}
               </Button>
 
-              {/* 2. Botón de Compra por WhatsApp */}
               <Button
                 type="button"
                 onClick={handleWhatsAppClick}
