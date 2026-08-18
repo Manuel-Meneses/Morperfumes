@@ -66,13 +66,6 @@ export function ProductCard({ product }: { product: Product }) {
             </a>
           </Button>
           
-          {/* Botón de WhatsApp con specs */}
-          <Button asChild size="sm" className="w-full text-xs h-9 bg-[#25D366] hover:bg-[#128C7E] text-white border-none">
-            <a href={linkWA} target="_blank" rel="noopener noreferrer">
-              <MessageCircle className="h-4 w-4 mr-2" />
-              Consultar Stock
-            </a>
-          </Button>
         </div>
       </div>
     </div>

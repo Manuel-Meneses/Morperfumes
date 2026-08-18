@@ -212,33 +212,50 @@ const normalize = (str: string) => {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 }
 
-export async function getCombos(): Promise<Combo[]> {
-  const allProducts = await getProducts();
+// 🏆 Lector de CSV Indestructible (Soporta "Alt+Enter" adentro de las celdas) 🏆
+function parseCSV(str: string) {
+  const arr: string[][] = [];
+  let quote = false, row = 0, col = 0;
+  for (let c = 0; c < str.length; c++) {
+    let cc = str[c], nc = str[c+1];
+    arr[row] = arr[row] || [];
+    arr[row][col] = arr[row][col] || '';
+    if (cc == '"' && quote && nc == '"') { arr[row][col] += cc; ++c; continue; }
+    if (cc == '"') { quote = !quote; continue; }
+    if (cc == ',' && !quote) { ++col; continue; }
+    if (cc == '\r' && nc == '\n' && !quote) { ++row; col = 0; ++c; continue; }
+    if (cc == '\n' && !quote) { ++row; col = 0; continue; }
+    if (cc == '\r' && !quote) { ++row; col = 0; continue; }
+    arr[row][col] += cc;
+  }
+  return arr;
+}
 
+export async function getCombos(): Promise<any[]> {
+  const allProducts = await getProducts();
   const MODO_DEMO = false; 
 
   try {
     let rows: any[] = [];
 
-    if (MODO_DEMO) {
-      // (Ignoramos esto porque MODO_DEMO está en false)
-    } else {
-      // 🟢 LECTURA DE TU EXCEL REAL 🟢
+    if (!MODO_DEMO) {
       const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSm56_l8WQ-eUgficmCHwtXbU_shpV6eEYLsKq50kYJGx5qZYFEJtoA0x1NonBMiE8-oE2xVrv2qqeS/pub?gid=0&single=true&output=csv";
 
       const response = await fetch(csvUrl, { next: { revalidate: 60 } });
       if (!response.ok) return [];
 
       const csvText = await response.text();
-      const lines = csvText.split('\n').filter(line => line.trim() !== '');
-      if (lines.length < 2) return []; 
+      
+      // 🏆 USAMOS EL NUEVO LECTOR DE CSV 🏆
+      const parsedData = parseCSV(csvText);
+      if (parsedData.length < 2) return [];
 
-      const headers = lines[0].split(',').map(h => h.trim());
-      rows = lines.slice(1).map(line => {
-        const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); 
+      const headers = parsedData[0].map(h => h.trim());
+      
+      rows = parsedData.slice(1).map(rowValues => {
         let obj: any = {};
         headers.forEach((header, i) => {
-          obj[header] = values[i] ? values[i].replace(/"/g, '').trim() : '';
+          obj[header] = rowValues[i] ? rowValues[i].trim() : '';
         });
         return obj;
       }).filter(row => row["Nombre"] && row["Nombre"].trim() !== "");
@@ -248,16 +265,42 @@ export async function getCombos(): Promise<Combo[]> {
     return rows.map((row: any) => {
       const nombresIncluidos = [row["Incluye_1"], row["Incluye_2"], row["Incluye_3"]].filter(item => item && item.trim() !== "");
 
-      // BUSCADOR DE FOTOS MEJORADO
-      const productosDelCombo = nombresIncluidos.map(nombreDelExcel => {
-        // MAGIA ACÁ: Le borramos la palabra "decant" (y paréntesis) solo para buscar la foto
-        const cleanSearch = normalize(nombreDelExcel).replace(/\(?decant\)?/g, "").trim();
-        
-        // Buscamos el nombre limpio en tu base de productos
-        return allProducts.find(p => normalize(p.name).includes(cleanSearch));
-      }).filter(Boolean);
+      // LÓGICA DE SÚPER COMBOS
+      const rawSlots = row["Opciones_SuperCombo"] || "";
+      let parsedCustomSlots = undefined;
 
-      const fotosExtraidas = productosDelCombo.map(p => p?.image).filter(Boolean) as string[];
+      if (rawSlots && rawSlots.trim() !== "") {
+        parsedCustomSlots = rawSlots.split("|").map((slot: string) => {
+          const [title, optionsStr] = slot.split(":");
+          const optionsArray = optionsStr ? optionsStr.split(",").map((opt: string) => opt.trim()) : [];
+          
+          const optionsWithImages = optionsArray.map((optName: string) => {
+            const cleanSearch = normalize(optName).replace(/\(?decant\)?/g, "").trim();
+            const foundProduct = allProducts.find(p => normalize(p.name).includes(cleanSearch));
+            return {
+              name: optName, 
+              image: foundProduct?.image || "/placeholder.svg" 
+            };
+          });
+
+          return {
+            title: title ? title.trim() : "Elegí una opción",
+            options: optionsWithImages
+          };
+        });
+      }
+
+      // BUSCADOR DE FOTOS PARA LA PORTADA
+      let fotosExtraidas: string[] = [];
+      if (parsedCustomSlots && parsedCustomSlots.length > 0) {
+        fotosExtraidas = parsedCustomSlots.slice(0, 3).map((slot: any) => slot.options[0]?.image).filter(Boolean);
+      } else {
+        const productosDelCombo = nombresIncluidos.map((nombreDelExcel: string) => {
+          const cleanSearch = normalize(nombreDelExcel).replace(/\(?decant\)?/g, "").trim();
+          return allProducts.find((p: any) => normalize(p.name).includes(cleanSearch));
+        }).filter(Boolean);
+        fotosExtraidas = productosDelCombo.map((p: any) => p?.image).filter(Boolean) as string[];
+      }
 
       return {
         id: row["ID"] || `combo-${Math.random().toString(36).substr(2, 9)}`,
@@ -265,10 +308,12 @@ export async function getCombos(): Promise<Combo[]> {
         includes: nombresIncluidos,
         originalPrice: parseInt(row["Precio_Original"]) || 0,
         price3ml: parseInt(row["Precio_Combo_3ml"]) || null,
-        price5ml: parseInt(row["Precio_Combo_5ml"]) || 0,
+        // ⚠️ ACÁ ES IMPORTANTE EL NOMBRE EXACTO DE LA COLUMNA DE PRECIO
+        price5ml: parseInt(row["Precio_Combo_5ml"]) || parseInt(row["Precio"]) || 0, 
         price10ml: parseInt(row["Precio_Combo_10ml"]) || null,
         description: row["Descripcion"] || "",
-        images: fotosExtraidas.length > 0 ? fotosExtraidas : []
+        images: fotosExtraidas.length > 0 ? fotosExtraidas : [],
+        customSlots: parsedCustomSlots 
       }
     });
 

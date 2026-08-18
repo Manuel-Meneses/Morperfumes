@@ -264,9 +264,6 @@ export default async function Home() {
                       <Link href={`/product/${product.id}`} className="flex-1 bg-transparent border border-[#c0a062] text-[#c0a062] hover:bg-[#c0a062] hover:text-[#141f36] text-xs font-bold py-2.5 px-3 flex items-center justify-center transition-colors rounded-sm uppercase tracking-widest">
                         Ver Detalles
                       </Link>
-                      <a href={getWaLink(product.name, product.price)} target="_blank" rel="noopener noreferrer" className="bg-[#25D366] text-white p-2.5 flex items-center justify-center hover:bg-[#128C7E] transition-colors rounded-sm shadow-md" aria-label="Consultar por WhatsApp">
-                        <MessageCircle className="w-5 h-5"/>
-                      </a>
                     </div>
                   </div>
                 </div>
@@ -376,9 +373,6 @@ export default async function Home() {
                     <Link href={`/product/${product.id}`} className="flex-1 bg-transparent border border-[#c0a062]/50 text-[#c0a062] hover:bg-[#c0a062] hover:text-[#141f36] text-[10px] sm:text-xs font-bold py-2.5 px-2 flex items-center justify-center transition-colors rounded-sm uppercase tracking-widest">
                       Ver Detalles
                     </Link>
-                    <a href={getWaLink(product.name, product.price)} target="_blank" rel="noopener noreferrer" className="bg-[#25D366] text-white p-2.5 flex items-center justify-center hover:bg-[#128C7E] transition-colors rounded-sm shadow-md" aria-label="Consultar por WhatsApp">
-                      <MessageCircle className="w-5 h-5"/>
-                    </a>
                   </div>
                 </div>
               </div>
@@ -432,9 +426,6 @@ export default async function Home() {
                     <Link href={`/product/${product.id}`} className="flex-1 bg-transparent border border-[#141f36]/30 text-[#141f36] hover:bg-[#141f36] hover:text-[#f6f4ed] text-[10px] sm:text-xs font-bold py-2.5 px-2 flex items-center justify-center transition-colors rounded-sm uppercase tracking-widest">
                       Ver Detalles
                     </Link>
-                    <a href={getWaLink(product.name, product.price)} target="_blank" rel="noopener noreferrer" className="bg-[#25D366] text-white p-2.5 flex items-center justify-center hover:bg-[#128C7E] transition-colors rounded-sm shadow-md" aria-label="Consultar por WhatsApp">
-                      <MessageCircle className="w-5 h-5"/>
-                    </a>
                   </div>
                 </div>
               </div>
@@ -497,165 +488,6 @@ export default async function Home() {
         </div>
       </section> 
 
-
-      <section className="bg-[#141f36] border-b border-[#c0a062]/20 py-24 overflow-hidden">
-        <div className="container mx-auto px-4 sm:px-6 mb-12 text-center">
-          <span className="text-[#c0a062] font-bold tracking-[0.2em] uppercase text-xs mb-3 block">El Oriente en tu piel</span>
-          <h2 className="font-serif text-4xl md:text-5xl font-medium text-[#f6f4ed] mb-4">
-            Árabes Raros
-          </h2>
-          <Button variant="link" asChild className="text-[#c0a062] hover:text-[#f6f4ed] text-base group">
-            <Link href="/shop?category=decants" className="flex items-center gap-2">
-              Explorar Colección <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </Button>
-        </div>
-
-        <div className="relative w-full pt-4">
-          <div className="absolute bottom-[20px] sm:bottom-[24px] left-0 w-full h-12 border-t-2 border-[#c0a062]/30 bg-gradient-to-b from-[#c0a062]/10 to-transparent z-0" />
-
-          <div className="flex overflow-x-auto snap-x snap-mandatory gap-8 sm:gap-12 px-6 sm:px-12 md:px-24 w-full [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-[#141f36] [&::-webkit-scrollbar-thumb]:bg-[#c0a062]/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#c0a062] pb-14 sm:pb-16 relative z-10">
-            {perfumesArabesRaros.map(product => (
-              <div key={product.id} className="snap-center shrink-0 w-48 sm:w-60 flex flex-col items-center group pt-6">
-                
-                <Link href={`/product/${product.id}`} className="relative h-60 sm:h-76 w-full flex items-end justify-center mb-6 transform transition-transform duration-500 group-hover:-translate-y-4 cursor-pointer">
-                  <Image 
-                    src={product.image} 
-                    alt={product.name} 
-                    fill 
-                    className="object-contain object-bottom drop-shadow-[0_20px_15px_rgba(0,0,0,0.7)] transition-transform duration-500 group-hover:scale-105" 
-                  />
-                </Link>
-
-                <div className="text-center w-full flex flex-col">
-                  <Link href={`/product/${product.id}`} className="cursor-pointer group-hover:text-[#c0a062] transition-colors">
-                    <h3 className="font-serif text-lg sm:text-xl text-[#f6f4ed] font-medium leading-tight mb-2 line-clamp-2">{product.name}</h3>
-                    <p className="font-serif text-[#c0a062] font-semibold text-xl mb-4">${product.price.toLocaleString("es-AR")}</p>
-                  </Link>
-                  <div className="flex gap-2 w-full mt-auto relative z-20">
-                    <Link href={`/product/${product.id}`} className="flex-1 bg-transparent border border-[#c0a062]/50 text-[#c0a062] hover:bg-[#c0a062] hover:text-[#141f36] text-[10px] sm:text-xs font-bold py-2.5 px-2 flex items-center justify-center transition-colors rounded-sm uppercase tracking-widest">
-                      Ver Detalles
-                    </Link>
-                    <a href={getWaLink(product.name, product.price)} target="_blank" rel="noopener noreferrer" className="bg-[#25D366] text-white p-2.5 flex items-center justify-center hover:bg-[#128C7E] transition-colors rounded-sm shadow-md" aria-label="Consultar por WhatsApp">
-                      <MessageCircle className="w-5 h-5"/>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            ))}
-            
-            <div className="snap-center shrink-0 w-36 sm:w-44 flex flex-col items-center justify-center pt-6 pb-14 sm:pb-16">
-               <Link href="/shop?category=decants" className="flex flex-col items-center justify-center h-60 sm:h-76 w-full border border-[#c0a062]/30 rounded-t-full hover:bg-[#c0a062]/10 transition-colors group mb-6">
-                  <span className="text-[#c0a062] text-xs uppercase tracking-widest font-bold mb-2">Ver Todo</span>
-                  <ArrowRight className="h-5 w-5 text-[#c0a062] transform group-hover:translate-x-2 transition-transform" />
-               </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-[#f6f4ed] border-y border-[#141f36]/10 py-24 overflow-hidden">
-        <div className="container mx-auto px-4 sm:px-6 mb-12 text-center">
-          <span className="text-[#141f36]/60 font-bold tracking-[0.2em] uppercase text-xs mb-3 block">Firma Contemporánea</span>
-          <h2 className="font-serif text-4xl md:text-5xl font-medium text-[#141f36] mb-4">
-            Catálogo de Diseñador
-          </h2>
-          <Button variant="link" asChild className="text-[#141f36] hover:text-[#c0a062] text-base group">
-            <Link href="/shop?category=sellados" className="flex items-center gap-2">
-              Ver Clásicos <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </Button>
-        </div>
-
-        <div className="relative w-full pt-4">
-          <div className="absolute bottom-[20px] sm:bottom-[24px] left-0 w-full h-12 border-t-2 border-[#141f36]/20 bg-gradient-to-b from-[#141f36]/5 to-transparent z-0" />
-
-          <div className="flex overflow-x-auto snap-x snap-mandatory gap-8 sm:gap-12 px-6 sm:px-12 md:px-24 w-full [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-[#f6f4ed] [&::-webkit-scrollbar-thumb]:bg-[#141f36]/30 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#141f36]/60 pb-14 sm:pb-16 relative z-10">
-            {perfumesDisenador.map(product => (
-              <div key={product.id} className="snap-center shrink-0 w-48 sm:w-60 flex flex-col items-center group pt-6">
-                
-                <Link href={`/product/${product.id}`} className="relative h-60 sm:h-76 w-full flex items-end justify-center mb-6 transform transition-transform duration-500 group-hover:-translate-y-4 cursor-pointer">
-                  <Image 
-                    src={product.image} 
-                    alt={product.name} 
-                    fill 
-                    className="object-contain object-bottom drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)] transition-transform duration-500 group-hover:scale-105" 
-                  />
-                </Link>
-
-                <div className="text-center w-full flex flex-col">
-                  <Link href={`/product/${product.id}`} className="cursor-pointer group-hover:text-[#c0a062] transition-colors">
-                    <h3 className="font-serif text-lg sm:text-xl text-[#141f36] font-medium leading-tight mb-2 line-clamp-2">{product.name}</h3>
-                    <p className="font-serif text-[#141f36] font-semibold text-xl mb-4">${product.price.toLocaleString("es-AR")}</p>
-                  </Link>
-                  <div className="flex gap-2 w-full mt-auto relative z-20">
-                    <Link href={`/product/${product.id}`} className="flex-1 bg-transparent border border-[#141f36]/30 text-[#141f36] hover:bg-[#141f36] hover:text-[#f6f4ed] text-[10px] sm:text-xs font-bold py-2.5 px-2 flex items-center justify-center transition-colors rounded-sm uppercase tracking-widest">
-                      Ver Detalles
-                    </Link>
-                    <a href={getWaLink(product.name, product.price)} target="_blank" rel="noopener noreferrer" className="bg-[#25D366] text-white p-2.5 flex items-center justify-center hover:bg-[#128C7E] transition-colors rounded-sm shadow-md" aria-label="Consultar por WhatsApp">
-                      <MessageCircle className="w-5 h-5"/>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            <div className="snap-center shrink-0 w-36 sm:w-44 flex flex-col items-center justify-center pt-6 pb-14 sm:pb-16">
-               <Link href="/shop?category=sellados" className="flex flex-col items-center justify-center h-60 sm:h-76 w-full border border-[#141f36]/30 rounded-t-full hover:bg-[#141f36]/10 transition-colors group mb-6">
-                  <span className="text-[#141f36] text-xs uppercase tracking-widest font-bold mb-2">Ver Todo</span>
-                  <ArrowRight className="h-5 w-5 text-[#141f36] transform group-hover:translate-x-2 transition-transform" />
-               </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-
-      <section className="py-24 sm:py-32 bg-[#e6e2d3]/30 overflow-hidden">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
-            <div className="max-w-2xl">
-              <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-medium text-[#141f36] leading-tight">
-                La perfumería, <br/> contada en primera persona.
-              </h2>
-            </div>
-            <a href="https://instagram.com/morperfumes_" target="_blank" rel="noreferrer" className="shrink-0 pb-2 border-b border-[#141f36] text-[#141f36] font-medium hover:text-[#c0a062] hover:border-[#c0a062] transition-colors flex items-center gap-2">
-              Seguinos en redes <ArrowRight className="w-4 h-4" />
-            </a>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-            {socialVideos.map((video, index) => (
-              <a 
-                key={video.id} 
-                href={video.link}
-                target="_blank" 
-                rel="noopener noreferrer"
-                className={`group relative aspect-[9/16] bg-[#141f36] overflow-hidden cursor-pointer block shadow-xl hover:shadow-2xl hover:shadow-[#c0a062]/20 transition-all duration-500 rounded-[2rem] sm:rounded-[2.5rem] border-[6px] border-white/40 ${index % 2 !== 0 ? 'md:mt-12' : ''}`}
-              >
-                <Image 
-                  src={video.image} 
-                  alt={video.title} 
-                  fill 
-                  className="object-cover opacity-90 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110" 
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#141f36] via-[#141f36]/20 to-transparent opacity-90" />
-                <div className="absolute inset-0 flex items-center justify-center z-20">
-                  <div className="w-14 h-14 backdrop-blur-sm bg-white/10 rounded-full flex items-center justify-center border border-white/40 group-hover:bg-[#c0a062]/90 group-hover:border-[#c0a062] group-hover:shadow-[0_0_25px_rgba(192,160,98,0.5)] transition-all duration-500 transform group-hover:scale-110">
-                    <Play className="h-5 w-5 text-white ml-1" fill="currentColor" />
-                  </div>
-                </div>
-                <div className="absolute bottom-0 left-0 w-full p-5 sm:p-6 z-20 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                  <h3 className="text-white font-serif text-base sm:text-lg leading-snug drop-shadow-md line-clamp-2">
-                    {video.title}
-                  </h3>
-                </div>
-              </a>
-            ))}
-            </div>
-        </div>
-      </section> 
 
       <section id="faq" className="bg-[#f6f4ed] border-t border-[#141f36]/10 py-24 sm:py-32">
         <div className="container mx-auto px-4 sm:px-6">
