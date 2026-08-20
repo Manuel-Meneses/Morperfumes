@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { createPortal } from "react-dom" // 🏆 IMPORTAMOS EL PORTAL 🏆
+import { createPortal } from "react-dom" 
 import Image from "next/image"
 import { Check, ShoppingCart, Plus, X, Info } from "lucide-react"
 import { useCart } from "@/components/cart-provider"
@@ -13,14 +13,12 @@ export function InteractiveComboCard({ combo }: { combo: any }) {
   
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selections, setSelections] = useState<Record<number, string>>({})
-  
-  // 🏆 ESTADO PARA SABER SI ESTAMOS EN EL CLIENTE (Necesario para el Portal) 🏆
   const [mounted, setMounted] = useState(false)
 
   const isSuperCombo = Boolean(combo.customSlots && combo.customSlots.length > 0);
 
   useEffect(() => {
-    setMounted(true) // Le decimos a React que ya cargó la página
+    setMounted(true) 
   }, [])
 
   useEffect(() => {
@@ -61,6 +59,16 @@ export function InteractiveComboCard({ combo }: { combo: any }) {
   const hasSealed = parsedItems.some((item: any) => !item.isDecant);
   const hasDecants = parsedItems.some((item: any) => item.isDecant);
   const isMixed = hasSealed && hasDecants;
+
+  // 🏆 LÓGICA AUTOMÁTICA DEL SUBTÍTULO 🏆
+  let comboTypeSubtitle = "COMBO DE SELLADOS";
+  if (isSuperCombo) {
+    comboTypeSubtitle = "COMBO ELEGIBLE";
+  } else if (isMixed) {
+    comboTypeSubtitle = "COMBO MIXTO";
+  } else if (hasDecants) {
+    comboTypeSubtitle = "COMBO DE DECANTS";
+  }
 
   const isConfigurable = Boolean(combo.price3ml || combo.price10ml);
   const [comboSize, setComboSize] = useState<"3ml" | "5ml" | "10ml">("5ml");
@@ -117,7 +125,7 @@ export function InteractiveComboCard({ combo }: { combo: any }) {
           <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 rounded-b-md ${isSuperCombo ? "bg-[#141f36]/30" : "bg-[#c0a062]/20"}`} /> 
           
           <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-             <Info className={`w-5 h-5 ${isSuperCombo ? "text-[#fff]/50" : "text-[#c0a062]/50"}`} />
+             <Info className={`w-5 h-5 ${isSuperCombo ? "text-[#141f36]/50" : "text-[#c0a062]/50"}`} />
           </div>
 
           <div className="absolute -top-32 left-0 w-full h-64 flex items-center justify-center z-20 pointer-events-none">
@@ -141,12 +149,17 @@ export function InteractiveComboCard({ combo }: { combo: any }) {
           </div>
 
           <div className="text-center w-full z-20 flex flex-col flex-1 mt-4">
-            <h3 className={`font-serif text-2xl md:text-3xl font-medium leading-tight mb-2 px-2 ${isSuperCombo ? "text-[#fff]" : "text-[#f6f4ed]"}`}>
+            <h3 className={`font-serif text-2xl md:text-3xl font-medium leading-tight mb-2 px-2 ${isSuperCombo ? "text-[#141f36]" : "text-[#f6f4ed]"}`}>
               {combo.name}
             </h3>
             
-            <div className="text-left w-full mt-4 mb-4 px-2">
-              <p className={`text-[9px] uppercase tracking-[0.2em] font-bold mb-4 text-center border-b pb-2 ${isSuperCombo ? "text-[#141f36] border-[#fff]/20" : "text-[#c0a062] border-[#c0a062]/20"}`}>
+            {/* 🏆 SUBTÍTULO AUTOMÁTICO EN LA TARJETA 🏆 */}
+            <h3 className={`block text-[10px] font-bold uppercase tracking-[0.2em] mb-2 opacity-80 ${isSuperCombo ? "text-[#141f36]" : "text-[#c0a062]"}`}>
+              {comboTypeSubtitle}
+            </h3>
+            
+            <div className="text-left w-full mt-2 mb-4 px-2">
+              <p className={`text-[7px] uppercase tracking-[0.2em] font-bold mb-4 text-center border-b pb-2 ${isSuperCombo ? "text-[#141f36] border-[#141f36]/20" : "text-[#c0a062] border-[#c0a062]/20"}`}>
                 {isSuperCombo ? "Elegí tus Opciones Adentro" : "Contenido del Set"}
               </p>
               
@@ -163,7 +176,7 @@ export function InteractiveComboCard({ combo }: { combo: any }) {
 
               {isSuperCombo && (
                  <div className="space-y-2.5 text-center px-4">
-                    <p className="text-[#fff]/80 text-sm font-serif italic">"Armá tu set personalizado con los mejores perfumes del catálogo a un valor único."</p>
+                    <p className="text-[#141f36]/80 text-sm font-serif italic">"Armá tu set personalizado con los mejores perfumes del catálogo a un valor único."</p>
                  </div>
               )}
 
@@ -180,7 +193,7 @@ export function InteractiveComboCard({ combo }: { combo: any }) {
                             onClick={(e) => { e.stopPropagation(); setComboSize(size as any); }}
                             className={`text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-sm transition-all ${
                               comboSize === size
-                                ? "bg-[#c0a062] text-[#fff]"
+                                ? "bg-[#c0a062] text-[#141f36]"
                                 : isDisabled ? "text-[#f6f4ed]/20 cursor-not-allowed" : "text-[#f6f4ed]/50 hover:text-[#c0a062]"
                             }`}
                           >
@@ -195,11 +208,11 @@ export function InteractiveComboCard({ combo }: { combo: any }) {
 
             <div className={`mt-auto pt-6 border-t w-full px-2 ${isSuperCombo ? "border-[#141f36]/10" : "border-[#c0a062]/10"}`}>
               <div className="flex items-center justify-center gap-3 mb-5">
-                <span key={currentPrice} className={`font-serif text-3xl font-semibold animate-in slide-in-from-bottom-1 fade-in duration-300 ${isSuperCombo ? "text-[#fff]" : "text-[#c0a062]"}`}>
+                <span key={currentPrice} className={`font-serif text-3xl font-semibold animate-in slide-in-from-bottom-1 fade-in duration-300 ${isSuperCombo ? "text-[#141f36]" : "text-[#c0a062]"}`}>
                   ${currentPrice.toLocaleString("es-AR")}
                 </span>
                 {combo.originalPrice > currentPrice && (
-                  <span className={`font-serif text-sm line-through ${isSuperCombo ? "text-[#fff]/50" : "text-[#f6f4ed]/40"}`}>
+                  <span className={`font-serif text-sm line-through ${isSuperCombo ? "text-[#141f36]/50" : "text-[#f6f4ed]/40"}`}>
                     ${combo.originalPrice.toLocaleString("es-AR")}
                   </span>
                 )}
@@ -210,7 +223,7 @@ export function InteractiveComboCard({ combo }: { combo: any }) {
                 className={`w-full h-12 rounded-none uppercase tracking-[0.2em] text-[10px] md:text-xs font-bold transition-colors flex items-center justify-center gap-2 shadow-lg ${
                   isSuperCombo 
                     ? "bg-[#141f36] hover:bg-[#1a2640] text-[#c0a062]" 
-                    : "bg-[#c0a062] hover:bg-[#f6f4ed] text-[#fff]"
+                    : "bg-[#c0a062] hover:bg-[#f6f4ed] text-[#141f36]"
                 }`}
               >
                 {isSuperCombo ? "Armar mi Combo" : "Ver Detalle"}
@@ -220,7 +233,7 @@ export function InteractiveComboCard({ combo }: { combo: any }) {
         </div>
       </div>
 
-      {/* 🏆 ================= MODAL TELETRANSPORTADO AL BODY ================= 🏆 */}
+      {/* ================= MODAL TELETRANSPORTADO AL BODY ================= */}
       {isModalOpen && mounted && createPortal(
         <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6">
           <div className="absolute inset-0 bg-[#141f36]/90 backdrop-blur-md transition-opacity animate-in fade-in duration-300" onClick={() => setIsModalOpen(false)} />
@@ -257,9 +270,11 @@ export function InteractiveComboCard({ combo }: { combo: any }) {
               </div>
 
               <div className="w-full md:w-1/2 p-6 md:p-12 flex flex-col justify-center">
+                {/* 🏆 SUBTÍTULO AUTOMÁTICO EN EL MODAL 🏆 */}
                 <span className="text-[#c0a062] text-[10px] font-bold uppercase tracking-[0.3em] mb-2">
-                  {isSuperCombo ? "Super Combo" : "Colección Privada"}
+                  {comboTypeSubtitle}
                 </span>
+                
                 <h2 className="font-serif text-2xl md:text-4xl font-medium text-[#141f36] mb-3 leading-tight">{combo.name}</h2>
                 <p className="text-[#141f36]/70 font-serif italic text-sm md:text-lg mb-6 leading-relaxed">"{combo.description}"</p>
                 

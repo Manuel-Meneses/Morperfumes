@@ -58,9 +58,9 @@ const Vitrina = ({ children, subtitle, isLight }: { children: React.ReactNode, s
       
       {/* Títulos */}
       <div className="text-center mb-10 sm:mb-16 relative z-20 px-4">
-        <p className={`text-xs md:text-sm uppercase tracking-[0.3em] font-bold ${isLight ? "text-[#141f36]/60" : "text-[#c0a062]"}`}>
+        <h2 className={`text-md md:text-xl uppercase tracking-[0.3em] font-bold ${isLight ? "text-[#141f36]/60" : "text-[#c0a062]"}`}>
           {subtitle}
-        </p>
+        </h2>
       </div>
       
       {/* CAJA OPTIMIZADA */}
