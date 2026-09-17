@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { X, Minus, Plus, ShoppingBag, MessageCircle } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { precioLista } from "@/lib/utils"
 
 interface CartDrawerProps {
   isOpen: boolean
@@ -18,9 +19,10 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     const numeroWA = "5493516087006"
     let mensaje = "¡Hola León e Indio! Quiero encargar esto:\n\n"
     items.forEach((item) => {
-      mensaje += `✦ *${item.name}* (${item.size}) x${item.quantity} - $${(item.price * item.quantity).toLocaleString("es-AR")}\n`
+      mensaje += `✦ *${item.name}* (${item.size}) x${item.quantity} - $${(item.price * item.quantity).toLocaleString("es-AR")} (efectivo/transf.)\n`
     })
-    mensaje += `\n*Total a abonar:* $${total.toLocaleString("es-AR")}\n\n¿Me confirman stock y datos para transferencia?`
+    mensaje += `\n💵 *Total efectivo / transferencia:* $${total.toLocaleString("es-AR")}\n`
+    mensaje += `💳 *Total con tarjeta (precio de lista):* $${precioLista(total).toLocaleString("es-AR")}\n\n¿Me confirman stock y datos para la compra?`
     return `https://wa.me/${numeroWA}?text=${encodeURIComponent(mensaje)}`
   }
 
@@ -102,9 +104,15 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                         <span className="text-xs font-bold w-4 text-center">{item.quantity}</span>
                         <button onClick={() => updateQuantity(item.id, item.size, item.quantity + 1)} className="px-2 py-1 hover:text-[#c0a062]"><Plus className="w-3 h-3" /></button>
                       </div>
-                      <p className="font-serif font-medium text-[#141f36] text-sm">
-                        ${(item.price * item.quantity).toLocaleString("es-AR")}
-                      </p>
+                      <div className="text-right">
+                        <p className="font-serif font-medium text-[#141f36] text-sm leading-tight">
+                          ${(item.price * item.quantity).toLocaleString("es-AR")}
+                        </p>
+                        <p className="text-[9px] uppercase tracking-widest text-[#c0a062] font-bold">Ef. / transf.</p>
+                        <p className="text-[10px] text-[#141f36]/50">
+                          Lista ${(precioLista(item.price) * item.quantity).toLocaleString("es-AR")}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -116,9 +124,15 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         {/* Footer del Carrito (Subtotales y Botón de Pago) */}
         {items.length > 0 && (
           <div className="border-t border-[#141f36]/10 bg-white p-6">
-            <div className="flex justify-between items-center mb-6 font-serif">
-              <span className="text-lg text-[#141f36]/70">Total estimado</span>
-              <span className="text-2xl font-semibold text-[#141f36]">${total.toLocaleString("es-AR")}</span>
+            <div className="mb-6 space-y-2">
+              <div className="flex justify-between items-baseline font-serif">
+                <span className="text-base text-[#141f36]/70 leading-tight">Total efectivo / transf.</span>
+                <span className="text-2xl font-semibold text-[#141f36]">${total.toLocaleString("es-AR")}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs text-[#141f36]/50 border-t border-dashed border-[#141f36]/10 pt-2">
+                <span>Total con tarjeta (lista)</span>
+                <span className="font-medium">${precioLista(total).toLocaleString("es-AR")}</span>
+              </div>
             </div>
 
             <Button asChild size="lg" className="w-full h-14 bg-[#141f36] hover:bg-[#1a2640] text-[#f6f4ed] rounded-none uppercase tracking-[0.2em] text-xs font-bold transition-all shadow-xl hover:-translate-y-1 mb-3">

@@ -10,6 +10,7 @@ import { Minus, Plus, X, Tag, ArrowLeft, MessageCircle } from "lucide-react"
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
+import { precioLista } from "@/lib/utils"
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, total } = useCart()
@@ -51,24 +52,28 @@ export default function CartPage() {
 
   const discountAmount = appliedCoupon ? (total * appliedCoupon.discount) / 100 : 0
   const subtotalAfterDiscount = total - discountAmount
+  // El total de arriba es el precio de EFECTIVO/TRANSFERENCIA.
+  // Este es el equivalente pagando con tarjeta (precio de lista).
+  const totalLista = precioLista(subtotalAfterDiscount)
 
   const generarEnlaceWhatsApp = () => {
     const numeroWA = "5493516087006"
     let mensaje = "¡Hola León e Indio! Quiero realizar el siguiente pedido:\n\n"
     
     items.forEach((item) => {
-      mensaje += `✦ *${item.name}*\n   Formato: ${item.size}\n   Cantidad: ${item.quantity}\n   Precio: $${(item.price * item.quantity).toLocaleString("es-AR")}\n\n`
+      mensaje += `✦ *${item.name}*\n   Formato: ${item.size}\n   Cantidad: ${item.quantity}\n   Precio (efectivo/transf.): $${(item.price * item.quantity).toLocaleString("es-AR")}\n\n`
     })
 
-    mensaje += `*Subtotal:* $${total.toLocaleString("es-AR")}\n`
-    
+    mensaje += `*Subtotal (efectivo/transf.):* $${total.toLocaleString("es-AR")}\n`
+
     if (appliedCoupon) {
       mensaje += `*Descuento (${appliedCoupon.code}):* -$${discountAmount.toLocaleString("es-AR")}\n`
     }
 
-    mensaje += `*Envío (Paq.ar):* A coordinar\n`
-    mensaje += `*Total a abonar:* $${subtotalAfterDiscount.toLocaleString("es-AR")}\n\n`
-    mensaje += "¿Me confirman el stock y los datos para realizar la transferencia?"
+    mensaje += `*Envío (Paq.ar):* A coordinar\n\n`
+    mensaje += `💵 *Total efectivo / transferencia:* $${subtotalAfterDiscount.toLocaleString("es-AR")}\n`
+    mensaje += `💳 *Total con tarjeta (precio de lista):* $${totalLista.toLocaleString("es-AR")}\n\n`
+    mensaje += "¿Me confirman el stock y los datos para realizar la compra?"
 
     return `https://wa.me/${numeroWA}?text=${encodeURIComponent(mensaje)}`
   }
@@ -176,9 +181,15 @@ export default function CartPage() {
                           <Plus className="h-4 w-4" />
                         </button>
                       </div>
-                      <p className="font-medium text-lg text-[#141f36]">
-                        ${(item.price * item.quantity).toLocaleString("es-AR")}
-                      </p>
+                      <div className="text-right">
+                        <p className="font-medium text-lg text-[#141f36] leading-tight">
+                          ${(item.price * item.quantity).toLocaleString("es-AR")}
+                        </p>
+                        <p className="text-[10px] uppercase tracking-widest text-[#4a5d4e] font-bold">Efectivo / transf.</p>
+                        <p className="text-xs text-[#141f36]/50 mt-0.5">
+                          Lista ${(precioLista(item.price) * item.quantity).toLocaleString("es-AR")}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -230,27 +241,36 @@ export default function CartPage() {
 
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between text-sm text-[#141f36]/80">
-                  <span>Subtotal</span>
+                  <span>Subtotal (efectivo / transf.)</span>
                   <span className="font-medium">${total.toLocaleString("es-AR")}</span>
                 </div>
-                
+
                 {appliedCoupon && (
                   <div className="flex justify-between text-sm text-[#4a5d4e] font-medium">
                     <span>Descuento ({appliedCoupon.discount}%)</span>
                     <span>-${discountAmount.toLocaleString("es-AR")}</span>
                   </div>
                 )}
-                
+
                 <div className="flex justify-between text-sm text-[#141f36]/80">
                   <span>Envío (Paq.ar)</span>
                   <span className="font-medium">A coordinar</span>
                 </div>
               </div>
 
-              <div className="border-t border-[#141f36]/10 pt-4 mb-6">
-                <div className="flex justify-between font-serif text-xl font-semibold text-[#141f36]">
-                  <span>Total</span>
-                  <span>${subtotalAfterDiscount.toLocaleString("es-AR")}</span>
+              <div className="border-t border-[#141f36]/10 pt-4 mb-6 space-y-3">
+                {/* Total pagando en efectivo o por transferencia (precio destacado) */}
+                <div className="flex justify-between items-baseline">
+                  <div className="flex flex-col">
+                    <span className="font-serif text-xl font-semibold text-[#141f36]">Total efectivo / transferencia</span>
+                    <span className="text-[10px] uppercase tracking-widest text-[#4a5d4e] font-bold">Precio final más conveniente</span>
+                  </div>
+                  <span className="font-serif text-2xl font-bold text-[#141f36]">${subtotalAfterDiscount.toLocaleString("es-AR")}</span>
+                </div>
+                {/* Total pagando con tarjeta (precio de lista) */}
+                <div className="flex justify-between items-center text-sm text-[#141f36]/60 border-t border-dashed border-[#141f36]/10 pt-3">
+                  <span>Total con tarjeta (precio de lista)</span>
+                  <span className="font-medium">${totalLista.toLocaleString("es-AR")}</span>
                 </div>
               </div>
 
