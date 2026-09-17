@@ -51,8 +51,6 @@ export default function CartPage() {
 
   const discountAmount = appliedCoupon ? (total * appliedCoupon.discount) / 100 : 0
   const subtotalAfterDiscount = total - discountAmount
-  
-  const envioGratis = subtotalAfterDiscount >= 100000
 
   const generarEnlaceWhatsApp = () => {
     const numeroWA = "5493516087006"
@@ -68,7 +66,7 @@ export default function CartPage() {
       mensaje += `*Descuento (${appliedCoupon.code}):* -$${discountAmount.toLocaleString("es-AR")}\n`
     }
 
-    mensaje += `*Envío (Paq.ar):* ${envioGratis ? "¡Gratis!" : "A coordinar"}\n`
+    mensaje += `*Envío (Paq.ar):* A coordinar\n`
     mensaje += `*Total a abonar:* $${subtotalAfterDiscount.toLocaleString("es-AR")}\n\n`
     mensaje += "¿Me confirman el stock y los datos para realizar la transferencia?"
 
@@ -245,7 +243,7 @@ export default function CartPage() {
                 
                 <div className="flex justify-between text-sm text-[#141f36]/80">
                   <span>Envío (Paq.ar)</span>
-                  <span className="font-medium">{envioGratis ? "¡Gratis!" : "A coordinar"}</span>
+                  <span className="font-medium">A coordinar</span>
                 </div>
               </div>
 
@@ -255,12 +253,6 @@ export default function CartPage() {
                   <span>${subtotalAfterDiscount.toLocaleString("es-AR")}</span>
                 </div>
               </div>
-
-              {!envioGratis && (
-                <p className="text-xs text-[#4a5d4e] mb-6 text-center font-medium bg-[#4a5d4e]/10 p-2">
-                  Agregá ${(100000 - subtotalAfterDiscount).toLocaleString("es-AR")} más para obtener envío gratis.
-                </p>
-              )}
 
               <Button asChild size="lg" className="w-full h-14 text-base mb-3 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-none border-none shadow-lg transition-colors">
                 <a href={generarEnlaceWhatsApp()} target="_blank" rel="noopener noreferrer">

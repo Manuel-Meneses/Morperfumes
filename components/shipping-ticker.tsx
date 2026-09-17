@@ -4,8 +4,7 @@ import { Truck } from "lucide-react"
 
 export function ShippingTicker() {
   const messages = [
-    "ENVÍO GRATIS A PARTIR DE $100.000", 
-    "100% ORIGINALES", 
+    "100% ORIGINALES",
     "ENVIAMOS DESDE CÓRDOBA A TODO EL PAÍS",
     "ABONÁS LA SEÑA Y EL RESTO AL ENVÍO"
   ]

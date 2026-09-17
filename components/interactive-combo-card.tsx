@@ -6,6 +6,7 @@ import Image from "next/image"
 import { Check, ShoppingCart, Plus, X, Info } from "lucide-react"
 import { useCart } from "@/components/cart-provider"
 import { useToast } from "@/hooks/use-toast"
+import { precioLista } from "@/lib/utils"
 
 export function InteractiveComboCard({ combo }: { combo: any }) {
   const { addItem } = useCart()
@@ -207,15 +208,23 @@ export function InteractiveComboCard({ combo }: { combo: any }) {
             </div>
 
             <div className={`mt-auto pt-6 border-t w-full px-2 ${isSuperCombo ? "border-[#141f36]/10" : "border-[#c0a062]/10"}`}>
-              <div className="flex items-center justify-center gap-3 mb-5">
-                <span key={currentPrice} className={`font-serif text-3xl font-semibold animate-in slide-in-from-bottom-1 fade-in duration-300 ${isSuperCombo ? "text-[#141f36]" : "text-[#c0a062]"}`}>
-                  ${currentPrice.toLocaleString("es-AR")}
-                </span>
-                {combo.originalPrice > currentPrice && (
-                  <span className={`font-serif text-sm line-through ${isSuperCombo ? "text-[#141f36]/50" : "text-[#f6f4ed]/40"}`}>
-                    ${combo.originalPrice.toLocaleString("es-AR")}
+              <div className="flex flex-col items-center gap-1 mb-5">
+                <div className="flex items-center justify-center gap-3">
+                  <span key={currentPrice} className={`font-serif text-3xl font-semibold animate-in slide-in-from-bottom-1 fade-in duration-300 ${isSuperCombo ? "text-[#141f36]" : "text-[#c0a062]"}`}>
+                    ${currentPrice.toLocaleString("es-AR")}
                   </span>
-                )}
+                  {combo.originalPrice > currentPrice && (
+                    <span className={`font-serif text-sm line-through ${isSuperCombo ? "text-[#141f36]/50" : "text-[#f6f4ed]/40"}`}>
+                      ${combo.originalPrice.toLocaleString("es-AR")}
+                    </span>
+                  )}
+                </div>
+                <span className={`text-[10px] font-bold uppercase tracking-widest ${isSuperCombo ? "text-[#141f36]/70" : "text-[#c0a062]/80"}`}>
+                  Efectivo / Transferencia
+                </span>
+                <span className={`text-[11px] ${isSuperCombo ? "text-[#141f36]/60" : "text-[#f6f4ed]/60"}`}>
+                  Precio de lista (tarjeta): ${precioLista(currentPrice).toLocaleString("es-AR")}
+                </span>
               </div>
 
               <button 
@@ -332,6 +341,8 @@ export function InteractiveComboCard({ combo }: { combo: any }) {
                 <div className="flex flex-col sm:flex-row items-center gap-4 mt-auto">
                    <div className="flex flex-col w-full sm:w-auto text-center sm:text-left mb-2 sm:mb-0">
                      <span key={currentPrice} className="font-serif text-3xl md:text-3xl font-bold text-[#141f36] leading-none">${currentPrice.toLocaleString("es-AR")}</span>
+                     <span className="text-[10px] font-bold uppercase tracking-widest text-[#c0a062] mt-1">Efectivo / Transferencia</span>
+                     <span className="text-xs text-[#141f36]/60 mt-0.5">Lista (tarjeta): ${precioLista(currentPrice).toLocaleString("es-AR")}</span>
                    </div>
                    <button 
                      onClick={handleAddToCart}

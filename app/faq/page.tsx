@@ -21,7 +21,7 @@ const faqs = [
       <div className="space-y-3">
         <p>Hacemos envíos a todo el país por Correo Argentino / PAQ.AR. Dentro de la provincia de Córdoba, por motomensajería o coordinando un punto de encuentro.</p>
         <p>Siempre buscamos despachar lo antes posible tu pedido para que lo tengas disponible.</p>
-        <p>Te confirmo el precio del envío por WhatsApp según tu ubicación y modo de envío (sucursal o domicilio). <strong>Envío gratis en decants a partir de $100.000.</strong></p>
+        <p>Te confirmo el precio del envío por WhatsApp según tu ubicación y modo de envío (sucursal o domicilio).</p>
         <ul className="list-disc pl-5 space-y-1 text-[#141f36]/80 mt-2">
           <li><strong>Córdoba:</strong> mismo día o a coordinar entre ambas partes.</li>
           <li><strong>Resto del país:</strong> de 3 a 7 días hábiles.</li>

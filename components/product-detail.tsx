@@ -6,7 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "./ui/button"
 import { useCart } from "./cart-provider"
 import { useToast } from "@/hooks/use-toast"
-import { Check, ShoppingBag, AlertCircle, MessageCircle, ArrowLeft } from "lucide-react" 
+import { Check, ShoppingBag, AlertCircle, MessageCircle, ArrowLeft } from "lucide-react"
+import { precioLista } from "@/lib/utils"
 
 interface Product {
   id: string
@@ -48,6 +49,7 @@ export function ProductDetail({ product }: { product: Product }) {
   }
 
   const precioActual = selectedSize ? calcularPrecioPorFormato(selectedSize) : product.price
+  const precioActualLista = precioLista(precioActual)
 
   const handleAddToCart = () => {
     if (!selectedSize) {
@@ -107,8 +109,9 @@ export function ProductDetail({ product }: { product: Product }) {
     
     let mensaje = `¡Hola León e Indio! Me interesa el perfume *${product.name}*.\n\n`
     mensaje += `Especificaciones:\n`
-    mensaje += `- Formato: ${selectedSize}\n` 
-    mensaje += `- Precio: $${precioActual.toLocaleString("es-AR")}\n`
+    mensaje += `- Formato: ${selectedSize}\n`
+    mensaje += `- Precio efectivo/transferencia: $${precioActual.toLocaleString("es-AR")}\n`
+    mensaje += `- Precio de lista (tarjeta): $${precioActualLista.toLocaleString("es-AR")}\n`
     mensaje += `- Notas: ${notasFormateadas}\n\n`
     mensaje += `¿Tienen stock disponible para encargar?`
 
@@ -165,9 +168,17 @@ export function ProductDetail({ product }: { product: Product }) {
               <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-medium mb-6 leading-[1.1] text-balance">
                 {product.name}
               </h1>
-              <p className="text-2xl sm:text-3xl font-serif text-[#141f36]">
-                ${precioActual.toLocaleString("es-AR")}
-              </p>
+              <div className="flex flex-col gap-1">
+                <p className="text-2xl sm:text-3xl font-serif text-[#141f36]">
+                  ${precioActual.toLocaleString("es-AR")}
+                  <span className="text-xs font-sans font-bold uppercase tracking-widest text-[#c0a062] ml-2 align-middle">
+                    Efectivo / Transferencia
+                  </span>
+                </p>
+                <p className="text-sm text-[#141f36]/60">
+                  Precio de lista (tarjeta): ${precioActualLista.toLocaleString("es-AR")}
+                </p>
+              </div>
             </div>
             
             <p className="text-base sm:text-lg text-[#141f36]/70 leading-relaxed mb-10 font-serif italic whitespace-pre-line">

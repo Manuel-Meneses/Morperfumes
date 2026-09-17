@@ -2,6 +2,7 @@ import { Header } from "@/components/header"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { getProducts, getCombos } from "@/lib/api"
+import { precioLista } from "@/lib/utils"
 import { InteractiveComboCard } from "@/components/interactive-combo-card"
 import { Play, ShieldCheck, Truck, MessageSquare, ChevronDown, ArrowRight, MessageCircle, Package } from "lucide-react"
 import Image from "next/image"
@@ -46,7 +47,7 @@ export default async function Home() {
   const numeroWA = "5493516087006"
 
   const getWaLink = (name: string, price: number) => {
-    const msj = `¡Hola León e Indio! Me interesa el perfume ${name}.\n\n- Precio: $${price.toLocaleString("es-AR")}\n\n¿Tienen stock disponible?`
+    const msj = `¡Hola León e Indio! Me interesa el perfume ${name}.\n\n- Precio efectivo/transferencia: $${price.toLocaleString("es-AR")}\n- Precio de lista (tarjeta): $${precioLista(price).toLocaleString("es-AR")}\n\n¿Tienen stock disponible?`
     return `https://wa.me/${numeroWA}?text=${encodeURIComponent(msj)}`
   }
 
@@ -91,7 +92,7 @@ export default async function Home() {
     },
     {
       q: "Envíos y demora",
-      a: "Hacemos envíos a todo el país por Correo Argentino / PAQ.AR. Dentro de la provincia de Córdoba, por motomensajería o coordinando un punto de encuentro.<br/><br/><strong>Envío gratis en decants a partir de $100.000.</strong><br/>• <strong>Córdoba:</strong> mismo día o a coordinar.<br/>• <strong>Resto del país:</strong> de 3 a 7 días hábiles."
+      a: "Hacemos envíos a todo el país por Correo Argentino / PAQ.AR. Dentro de la provincia de Córdoba, por motomensajería o coordinando un punto de encuentro.<br/><br/>• <strong>Córdoba:</strong> mismo día o a coordinar.<br/>• <strong>Resto del país:</strong> de 3 a 7 días hábiles."
     },
     {
       q: "¿Puedo conseguir un perfume que no está en el catálogo?",
@@ -256,10 +257,16 @@ export default async function Home() {
                   </Link>
                   
                   <div className="border-t border-[#f6f4ed]/20 pt-4 mt-auto">
-                    <p className="text-[#c0a062] font-serif text-2xl font-semibold mb-4">
-                      <span className="text-xs font-sans text-[#f6f4ed]/70 font-normal uppercase tracking-widest mr-2">Desde</span>
-                      ${product.price.toLocaleString("es-AR")}
-                    </p>
+                    <div className="mb-4">
+                      <p className="text-[#c0a062] font-serif text-2xl font-semibold">
+                        <span className="text-xs font-sans text-[#f6f4ed]/70 font-normal uppercase tracking-widest mr-2">Desde</span>
+                        ${product.price.toLocaleString("es-AR")}
+                        <span className="text-[10px] font-sans text-[#f6f4ed]/60 font-normal uppercase tracking-widest ml-2">ef./transf.</span>
+                      </p>
+                      <p className="text-[11px] text-[#f6f4ed]/60 mt-0.5">
+                        Lista ${precioLista(product.price).toLocaleString("es-AR")}
+                      </p>
+                    </div>
                     <div className="flex gap-2 relative z-20">
                       <Link href={`/product/${product.id}`} className="flex-1 bg-transparent border border-[#c0a062] text-[#c0a062] hover:bg-[#c0a062] hover:text-[#141f36] text-xs font-bold py-2.5 px-3 flex items-center justify-center transition-colors rounded-sm uppercase tracking-widest">
                         Ver Detalles
@@ -367,7 +374,11 @@ export default async function Home() {
                 <div className="text-center w-full flex flex-col">
                   <Link href={`/product/${product.id}`} className="cursor-pointer group-hover:text-[#c0a062] transition-colors">
                     <h3 className="font-serif text-lg sm:text-xl text-[#f6f4ed] font-medium leading-tight mb-2 line-clamp-2">{product.name}</h3>
-                    <p className="font-serif text-[#c0a062] font-semibold text-xl mb-4">${product.price.toLocaleString("es-AR")}</p>
+                    <p className="font-serif text-[#c0a062] font-semibold text-xl mb-0.5">
+                      ${product.price.toLocaleString("es-AR")}
+                      <span className="text-[10px] font-sans text-[#f6f4ed]/60 font-normal uppercase tracking-widest ml-1.5">ef./transf.</span>
+                    </p>
+                    <p className="text-[11px] text-[#f6f4ed]/60 mb-4">Lista ${precioLista(product.price).toLocaleString("es-AR")}</p>
                   </Link>
                   <div className="flex gap-2 w-full mt-auto relative z-20">
                     <Link href={`/product/${product.id}`} className="flex-1 bg-transparent border border-[#c0a062]/50 text-[#c0a062] hover:bg-[#c0a062] hover:text-[#141f36] text-[10px] sm:text-xs font-bold py-2.5 px-2 flex items-center justify-center transition-colors rounded-sm uppercase tracking-widest">
@@ -420,7 +431,11 @@ export default async function Home() {
                 <div className="text-center w-full flex flex-col">
                   <Link href={`/product/${product.id}`} className="cursor-pointer group-hover:text-[#c0a062] transition-colors">
                     <h3 className="font-serif text-lg sm:text-xl text-[#141f36] font-medium leading-tight mb-2 line-clamp-2">{product.name}</h3>
-                    <p className="font-serif text-[#141f36] font-semibold text-xl mb-4">${product.price.toLocaleString("es-AR")}</p>
+                    <p className="font-serif text-[#141f36] font-semibold text-xl mb-0.5">
+                      ${product.price.toLocaleString("es-AR")}
+                      <span className="text-[10px] font-sans text-[#141f36]/50 font-normal uppercase tracking-widest ml-1.5">ef./transf.</span>
+                    </p>
+                    <p className="text-[11px] text-[#141f36]/50 mb-4">Lista ${precioLista(product.price).toLocaleString("es-AR")}</p>
                   </Link>
                   <div className="flex gap-2 w-full mt-auto relative z-20">
                     <Link href={`/product/${product.id}`} className="flex-1 bg-transparent border border-[#141f36]/30 text-[#141f36] hover:bg-[#141f36] hover:text-[#f6f4ed] text-[10px] sm:text-xs font-bold py-2.5 px-2 flex items-center justify-center transition-colors rounded-sm uppercase tracking-widest">

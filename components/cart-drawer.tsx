@@ -14,8 +14,6 @@ interface CartDrawerProps {
 export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   const { items, removeItem, updateQuantity, total } = useCart()
 
-  const envioGratis = total >= 100000
-
   const generarEnlaceWhatsApp = () => {
     const numeroWA = "5493516087006"
     let mensaje = "¡Hola León e Indio! Quiero encargar esto:\n\n"
@@ -118,12 +116,6 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         {/* Footer del Carrito (Subtotales y Botón de Pago) */}
         {items.length > 0 && (
           <div className="border-t border-[#141f36]/10 bg-white p-6">
-            {!envioGratis && (
-              <p className="text-[10px] text-center text-[#141f36]/60 uppercase tracking-widest mb-4 font-bold bg-[#f6f4ed] py-2 border border-[#141f36]/10">
-                Faltan ${(100000 - total).toLocaleString("es-AR")} para envío gratis
-              </p>
-            )}
-            
             <div className="flex justify-between items-center mb-6 font-serif">
               <span className="text-lg text-[#141f36]/70">Total estimado</span>
               <span className="text-2xl font-semibold text-[#141f36]">${total.toLocaleString("es-AR")}</span>

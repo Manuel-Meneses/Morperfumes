@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { getProducts, Product } from "@/lib/api"
 import { useCart } from "@/components/cart-provider"
 import { useToast } from "@/hooks/use-toast"
+import { precioLista } from "@/lib/utils"
 
 // Convertimos tu componente principal en "ProductContent" para poder envolverlo después
 function ProductContent({ productId }: { productId: string }) {
@@ -118,7 +119,7 @@ function ProductContent({ productId }: { productId: string }) {
   }
 
   const numeroWA = "5493516087006"
-  const mensajeWA = `¡Hola León e Indio! Quiero consultar por el perfume ${product.name} en formato ${selectedSize} ($${currentPrice.toLocaleString("es-AR")}). ¿Tienen stock?`
+  const mensajeWA = `¡Hola León e Indio! Quiero consultar por el perfume ${product.name} en formato ${selectedSize} (efectivo/transferencia: $${currentPrice.toLocaleString("es-AR")} - lista/tarjeta: $${precioLista(currentPrice).toLocaleString("es-AR")}). ¿Tienen stock?`
   const linkWA = `https://wa.me/${numeroWA}?text=${encodeURIComponent(mensajeWA)}`
   const linkRating = `https://www.fragrantica.es/buscar/?q=${encodeURIComponent(product.name)}`
 
@@ -174,8 +175,16 @@ function ProductContent({ productId }: { productId: string }) {
                 </p>
               )}
 
-              <div className="text-4xl font-serif text-[#c0a062] font-semibold mt-4 transition-all duration-300">
-                ${currentPrice.toLocaleString("es-AR")}
+              <div className="mt-4">
+                <div className="text-4xl font-serif text-[#c0a062] font-semibold transition-all duration-300">
+                  ${currentPrice.toLocaleString("es-AR")}
+                  <span className="text-xs font-sans font-bold uppercase tracking-widest text-[#141f36]/50 ml-2 align-middle">
+                    Efectivo / Transferencia
+                  </span>
+                </div>
+                <p className="text-sm text-[#141f36]/60 mt-1">
+                  Precio de lista (tarjeta): ${precioLista(currentPrice).toLocaleString("es-AR")}
+                </p>
               </div>
             </div>
 
