@@ -5,7 +5,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { MessageCircle, Star } from "lucide-react"
 import { Button } from "./ui/button"
-import { precioLista } from "@/lib/utils"
+import { precioCuota } from "@/lib/utils"
 
 export interface Product {
   id: string
@@ -21,7 +21,7 @@ export function ProductCard({ product }: { product: Product }) {
   const numeroWA = "5493516087006"
   
   // Armamos el mensaje específico para este producto
-  const mensajeWA = `¡Hola León e Indio! Me interesa el perfume ${product.name}.\n\nEspecificaciones:\n- Precio efectivo/transferencia: $${product.price.toLocaleString("es-AR")}\n- Precio de lista (tarjeta): $${precioLista(product.price).toLocaleString("es-AR")}\n- Notas: ${product.notes}\n\n¿Tienen stock disponible para encargar?`
+  const mensajeWA = `¡Hola León e Indio! Me interesa el perfume ${product.name}.\n\nEspecificaciones:\n- Precio efectivo/transferencia: $${product.price.toLocaleString("es-AR")}\n- Con tarjeta: 3 cuotas de $${precioCuota(product.price).toLocaleString("es-AR")}\n- Notas: ${product.notes}\n\n¿Tienen stock disponible para encargar?`
   const linkWA = `https://wa.me/${numeroWA}?text=${encodeURIComponent(mensajeWA)}`
   
   // Link para el rating (busca el nombre del perfume en Fragrantica)
@@ -62,7 +62,7 @@ export function ProductCard({ product }: { product: Product }) {
             </span>
           </p>
           <p className="text-xs text-muted-foreground">
-            Precio de lista ${precioLista(product.price).toLocaleString("es-AR")}
+            o 3 cuotas de ${precioCuota(product.price).toLocaleString("es-AR")}
           </p>
         </div>
 

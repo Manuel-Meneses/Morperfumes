@@ -2,7 +2,7 @@ import { Header } from "@/components/header"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { getProducts, getCombos } from "@/lib/api"
-import { precioLista } from "@/lib/utils"
+import { precioCuota } from "@/lib/utils"
 import { InteractiveComboCard } from "@/components/interactive-combo-card"
 import { Play, ShieldCheck, Truck, MessageSquare, ChevronDown, ArrowRight, MessageCircle, Package } from "lucide-react"
 import Image from "next/image"
@@ -47,7 +47,7 @@ export default async function Home() {
   const numeroWA = "5493516087006"
 
   const getWaLink = (name: string, price: number) => {
-    const msj = `¡Hola León e Indio! Me interesa el perfume ${name}.\n\n- Precio efectivo/transferencia: $${price.toLocaleString("es-AR")}\n- Precio de lista (tarjeta): $${precioLista(price).toLocaleString("es-AR")}\n\n¿Tienen stock disponible?`
+    const msj = `¡Hola León e Indio! Me interesa el perfume ${name}.\n\n- Precio efectivo/transferencia: $${price.toLocaleString("es-AR")}\n- Con tarjeta: 3 cuotas de $${precioCuota(price).toLocaleString("es-AR")}\n\n¿Tienen stock disponible?`
     return `https://wa.me/${numeroWA}?text=${encodeURIComponent(msj)}`
   }
 
@@ -264,7 +264,7 @@ export default async function Home() {
                         <span className="text-[10px] font-sans text-[#f6f4ed]/60 font-normal uppercase tracking-widest ml-2">ef./transf.</span>
                       </p>
                       <p className="text-[11px] text-[#f6f4ed]/60 mt-0.5">
-                        Lista ${precioLista(product.price).toLocaleString("es-AR")}
+                        o 3 cuotas de ${precioCuota(product.price).toLocaleString("es-AR")}
                       </p>
                     </div>
                     <div className="flex gap-2 relative z-20">
@@ -378,7 +378,7 @@ export default async function Home() {
                       ${product.price.toLocaleString("es-AR")}
                       <span className="text-[10px] font-sans text-[#f6f4ed]/60 font-normal uppercase tracking-widest ml-1.5">ef./transf.</span>
                     </p>
-                    <p className="text-[11px] text-[#f6f4ed]/60 mb-4">Lista ${precioLista(product.price).toLocaleString("es-AR")}</p>
+                    <p className="text-[11px] text-[#f6f4ed]/60 mb-4">o 3 cuotas de ${precioCuota(product.price).toLocaleString("es-AR")}</p>
                   </Link>
                   <div className="flex gap-2 w-full mt-auto relative z-20">
                     <Link href={`/product/${product.id}`} className="flex-1 bg-transparent border border-[#c0a062]/50 text-[#c0a062] hover:bg-[#c0a062] hover:text-[#141f36] text-[10px] sm:text-xs font-bold py-2.5 px-2 flex items-center justify-center transition-colors rounded-sm uppercase tracking-widest">
@@ -435,7 +435,7 @@ export default async function Home() {
                       ${product.price.toLocaleString("es-AR")}
                       <span className="text-[10px] font-sans text-[#141f36]/50 font-normal uppercase tracking-widest ml-1.5">ef./transf.</span>
                     </p>
-                    <p className="text-[11px] text-[#141f36]/50 mb-4">Lista ${precioLista(product.price).toLocaleString("es-AR")}</p>
+                    <p className="text-[11px] text-[#141f36]/50 mb-4">o 3 cuotas de ${precioCuota(product.price).toLocaleString("es-AR")}</p>
                   </Link>
                   <div className="flex gap-2 w-full mt-auto relative z-20">
                     <Link href={`/product/${product.id}`} className="flex-1 bg-transparent border border-[#141f36]/30 text-[#141f36] hover:bg-[#141f36] hover:text-[#f6f4ed] text-[10px] sm:text-xs font-bold py-2.5 px-2 flex items-center justify-center transition-colors rounded-sm uppercase tracking-widest">

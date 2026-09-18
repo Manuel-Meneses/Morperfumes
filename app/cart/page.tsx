@@ -10,7 +10,7 @@ import { Minus, Plus, X, Tag, ArrowLeft, MessageCircle } from "lucide-react"
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
-import { precioLista } from "@/lib/utils"
+import { precioCuota } from "@/lib/utils"
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, total } = useCart()
@@ -53,8 +53,8 @@ export default function CartPage() {
   const discountAmount = appliedCoupon ? (total * appliedCoupon.discount) / 100 : 0
   const subtotalAfterDiscount = total - discountAmount
   // El total de arriba es el precio de EFECTIVO/TRANSFERENCIA.
-  // Este es el equivalente pagando con tarjeta (precio de lista).
-  const totalLista = precioLista(subtotalAfterDiscount)
+  // Este es el valor de cada una de las 3 cuotas pagando con tarjeta.
+  const totalCuota = precioCuota(subtotalAfterDiscount)
 
   const generarEnlaceWhatsApp = () => {
     const numeroWA = "5493516087006"
@@ -72,7 +72,7 @@ export default function CartPage() {
 
     mensaje += `*Envío (Paq.ar):* A coordinar\n\n`
     mensaje += `💵 *Total efectivo / transferencia:* $${subtotalAfterDiscount.toLocaleString("es-AR")}\n`
-    mensaje += `💳 *Total con tarjeta (precio de lista):* $${totalLista.toLocaleString("es-AR")}\n\n`
+    mensaje += `💳 *Con tarjeta:* 3 cuotas de $${totalCuota.toLocaleString("es-AR")}\n\n`
     mensaje += "¿Me confirman el stock y los datos para realizar la compra?"
 
     return `https://wa.me/${numeroWA}?text=${encodeURIComponent(mensaje)}`
@@ -187,7 +187,7 @@ export default function CartPage() {
                         </p>
                         <p className="text-[10px] uppercase tracking-widest text-[#4a5d4e] font-bold">Efectivo / transf.</p>
                         <p className="text-xs text-[#141f36]/50 mt-0.5">
-                          Lista ${(precioLista(item.price) * item.quantity).toLocaleString("es-AR")}
+                          o 3 cuotas de ${(precioCuota(item.price) * item.quantity).toLocaleString("es-AR")}
                         </p>
                       </div>
                     </div>
@@ -267,10 +267,10 @@ export default function CartPage() {
                   </div>
                   <span className="font-serif text-2xl font-bold text-[#141f36]">${subtotalAfterDiscount.toLocaleString("es-AR")}</span>
                 </div>
-                {/* Total pagando con tarjeta (precio de lista) */}
+                {/* Total pagando con tarjeta en 3 cuotas */}
                 <div className="flex justify-between items-center text-sm text-[#141f36]/60 border-t border-dashed border-[#141f36]/10 pt-3">
-                  <span>Total con tarjeta (precio de lista)</span>
-                  <span className="font-medium">${totalLista.toLocaleString("es-AR")}</span>
+                  <span>o con tarjeta en 3 cuotas de</span>
+                  <span className="font-medium">${totalCuota.toLocaleString("es-AR")}</span>
                 </div>
               </div>
 

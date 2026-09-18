@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { getProducts, Product } from "@/lib/api"
 import { useCart } from "@/components/cart-provider"
 import { useToast } from "@/hooks/use-toast"
-import { precioLista } from "@/lib/utils"
+import { precioLista, precioCuota } from "@/lib/utils"
 
 // Convertimos tu componente principal en "ProductContent" para poder envolverlo después
 function ProductContent({ productId }: { productId: string }) {
@@ -119,7 +119,7 @@ function ProductContent({ productId }: { productId: string }) {
   }
 
   const numeroWA = "5493516087006"
-  const mensajeWA = `¡Hola León e Indio! Quiero consultar por el perfume ${product.name} en formato ${selectedSize} (efectivo/transferencia: $${currentPrice.toLocaleString("es-AR")} - lista/tarjeta: $${precioLista(currentPrice).toLocaleString("es-AR")}). ¿Tienen stock?`
+  const mensajeWA = `¡Hola León e Indio! Quiero consultar por el perfume ${product.name} en formato ${selectedSize} (efectivo/transferencia: $${currentPrice.toLocaleString("es-AR")} - lista/tarjeta: $${precioLista(currentPrice).toLocaleString("es-AR")} en 3 cuotas de $${precioCuota(currentPrice).toLocaleString("es-AR")}). ¿Tienen stock?`
   const linkWA = `https://wa.me/${numeroWA}?text=${encodeURIComponent(mensajeWA)}`
   const linkRating = `https://www.fragrantica.es/buscar/?q=${encodeURIComponent(product.name)}`
 
@@ -184,6 +184,9 @@ function ProductContent({ productId }: { productId: string }) {
                 </div>
                 <p className="text-sm text-[#141f36]/60 mt-1">
                   Precio de lista (tarjeta): ${precioLista(currentPrice).toLocaleString("es-AR")}
+                </p>
+                <p className="text-sm text-[#141f36]/60">
+                  o 3 cuotas de ${precioCuota(currentPrice).toLocaleString("es-AR")}
                 </p>
               </div>
             </div>

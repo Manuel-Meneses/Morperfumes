@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { X, Minus, Plus, ShoppingBag, MessageCircle } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { precioLista } from "@/lib/utils"
+import { precioCuota } from "@/lib/utils"
 
 interface CartDrawerProps {
   isOpen: boolean
@@ -22,7 +22,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
       mensaje += `✦ *${item.name}* (${item.size}) x${item.quantity} - $${(item.price * item.quantity).toLocaleString("es-AR")} (efectivo/transf.)\n`
     })
     mensaje += `\n💵 *Total efectivo / transferencia:* $${total.toLocaleString("es-AR")}\n`
-    mensaje += `💳 *Total con tarjeta (precio de lista):* $${precioLista(total).toLocaleString("es-AR")}\n\n¿Me confirman stock y datos para la compra?`
+    mensaje += `💳 *Con tarjeta:* 3 cuotas de $${precioCuota(total).toLocaleString("es-AR")}\n\n¿Me confirman stock y datos para la compra?`
     return `https://wa.me/${numeroWA}?text=${encodeURIComponent(mensaje)}`
   }
 
@@ -110,7 +110,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                         </p>
                         <p className="text-[9px] uppercase tracking-widest text-[#c0a062] font-bold">Ef. / transf.</p>
                         <p className="text-[10px] text-[#141f36]/50">
-                          Lista ${(precioLista(item.price) * item.quantity).toLocaleString("es-AR")}
+                          3 cuotas de ${(precioCuota(item.price) * item.quantity).toLocaleString("es-AR")}
                         </p>
                       </div>
                     </div>
@@ -130,8 +130,8 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 <span className="text-2xl font-semibold text-[#141f36]">${total.toLocaleString("es-AR")}</span>
               </div>
               <div className="flex justify-between items-center text-xs text-[#141f36]/50 border-t border-dashed border-[#141f36]/10 pt-2">
-                <span>Total con tarjeta (lista)</span>
-                <span className="font-medium">${precioLista(total).toLocaleString("es-AR")}</span>
+                <span>o 3 cuotas con tarjeta de</span>
+                <span className="font-medium">${precioCuota(total).toLocaleString("es-AR")}</span>
               </div>
             </div>
 

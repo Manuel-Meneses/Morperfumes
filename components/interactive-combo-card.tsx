@@ -6,7 +6,7 @@ import Image from "next/image"
 import { Check, ShoppingCart, Plus, X, Info } from "lucide-react"
 import { useCart } from "@/components/cart-provider"
 import { useToast } from "@/hooks/use-toast"
-import { precioLista } from "@/lib/utils"
+import { precioCuota } from "@/lib/utils"
 
 export function InteractiveComboCard({ combo }: { combo: any }) {
   const { addItem } = useCart()
@@ -223,7 +223,7 @@ export function InteractiveComboCard({ combo }: { combo: any }) {
                   Efectivo / Transferencia
                 </span>
                 <span className={`text-[11px] ${isSuperCombo ? "text-[#141f36]/60" : "text-[#f6f4ed]/60"}`}>
-                  Precio de lista (tarjeta): ${precioLista(currentPrice).toLocaleString("es-AR")}
+                  o 3 cuotas de ${precioCuota(currentPrice).toLocaleString("es-AR")}
                 </span>
               </div>
 
@@ -342,7 +342,7 @@ export function InteractiveComboCard({ combo }: { combo: any }) {
                    <div className="flex flex-col w-full sm:w-auto text-center sm:text-left mb-2 sm:mb-0">
                      <span key={currentPrice} className="font-serif text-3xl md:text-3xl font-bold text-[#141f36] leading-none">${currentPrice.toLocaleString("es-AR")}</span>
                      <span className="text-[10px] font-bold uppercase tracking-widest text-[#c0a062] mt-1">Efectivo / Transferencia</span>
-                     <span className="text-xs text-[#141f36]/60 mt-0.5">Lista (tarjeta): ${precioLista(currentPrice).toLocaleString("es-AR")}</span>
+                     <span className="text-xs text-[#141f36]/60 mt-0.5">o 3 cuotas de ${precioCuota(currentPrice).toLocaleString("es-AR")}</span>
                    </div>
                    <button 
                      onClick={handleAddToCart}
