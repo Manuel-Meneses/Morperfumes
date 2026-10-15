@@ -11,38 +11,65 @@ import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
 import { precioCuota } from "@/lib/utils"
+import { validarCupon, type CuponAplicado } from "@/lib/coupons"
+
+// Códigos ya usados en este navegador (uso único por persona).
+// Es un freno en la web; el control definitivo se hace por WhatsApp con el número del cliente.
+const CUPONES_USADOS_KEY = "cuponesUsados"
+
+function getCuponesUsados(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(CUPONES_USADOS_KEY) || "[]")
+  } catch {
+    return []
+  }
+}
+
+function marcarCuponUsado(code: string) {
+  try {
+    const usados = getCuponesUsados()
+    if (!usados.includes(code)) localStorage.setItem(CUPONES_USADOS_KEY, JSON.stringify([...usados, code]))
+  } catch {}
+}
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, total } = useCart()
   const [couponCode, setCouponCode] = useState("")
-  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null)
+  const [appliedCoupon, setAppliedCoupon] = useState<CuponAplicado | null>(null)
   const [isApplying, setIsApplying] = useState(false)
   const { toast } = useToast()
 
-  const coupons = {
-    "MOR10": 10,
-    "HERENCIA": 15,
-  }
+  const handleApplyCoupon = async () => {
+    // Uso único por persona: si este navegador ya envió un pedido con el código, no se reaplica
+    if (getCuponesUsados().includes(couponCode.trim().toUpperCase())) {
+      toast({
+        title: "Código ya utilizado",
+        description: "Este código es de un solo uso por persona.",
+        variant: "destructive",
+      })
+      return
+    }
 
-  const handleApplyCoupon = () => {
     setIsApplying(true)
-    setTimeout(() => {
-      const discount = coupons[couponCode.toUpperCase() as keyof typeof coupons]
-      if (discount) {
-        setAppliedCoupon({ code: couponCode.toUpperCase(), discount })
+    try {
+      const resultado = await validarCupon(couponCode, items.map((i) => i.id))
+      if (resultado.ok) {
+        const { ok, ...cupon } = resultado
+        setAppliedCoupon(cupon)
         toast({
           title: "¡Cupón aplicado!",
-          description: `Ahorraste un ${discount}% en tu pedido.`,
+          description: cupon.appliesTo
+            ? `${cupon.percent}% off en decants de ${cupon.appliesTo}.`
+            : `Ahorraste un ${cupon.percent}% en tu pedido.`,
         })
       } else {
-        toast({
-          title: "Cupón inválido",
-          description: "Por favor revisá el código e intentá nuevamente.",
-          variant: "destructive",
-        })
+        toast({ title: "Cupón inválido", description: resultado.error, variant: "destructive" })
       }
+    } catch {
+      toast({ title: "Error", description: "No pudimos validar el código. Probá de nuevo.", variant: "destructive" })
+    } finally {
       setIsApplying(false)
-    }, 500)
+    }
   }
 
   const handleRemoveCoupon = () => {
@@ -50,7 +77,13 @@ export default function CartPage() {
     setCouponCode("")
   }
 
-  const discountAmount = appliedCoupon ? (total * appliedCoupon.discount) / 100 : 0
+  // El descuento se aplica solo sobre los productos que habilita el cupón
+  const subtotalElegible = appliedCoupon
+    ? items
+        .filter((item) => appliedCoupon.eligibleIds.includes(item.id))
+        .reduce((sum, item) => sum + item.price * item.quantity, 0)
+    : 0
+  const discountAmount = appliedCoupon ? Math.round((subtotalElegible * appliedCoupon.percent) / 100) : 0
   const subtotalAfterDiscount = total - discountAmount
   // El total de arriba es el precio de EFECTIVO/TRANSFERENCIA.
   // Este es el valor de cada una de las 3 cuotas pagando con tarjeta.
@@ -67,7 +100,8 @@ export default function CartPage() {
     mensaje += `*Subtotal (efectivo/transf.):* $${total.toLocaleString("es-AR")}\n`
 
     if (appliedCoupon) {
-      mensaje += `*Descuento (${appliedCoupon.code}):* -$${discountAmount.toLocaleString("es-AR")}\n`
+      mensaje += `*Descuento (${appliedCoupon.code} - ${appliedCoupon.percent}%${appliedCoupon.appliesTo ? ` en decants de ${appliedCoupon.appliesTo}` : ""}):* -$${discountAmount.toLocaleString("es-AR")}\n`
+      mensaje += `_(Cupón de uso único por persona)_\n`
     }
 
     mensaje += `*Envío (Paq.ar):* A coordinar\n\n`
@@ -211,7 +245,7 @@ export default function CartPage() {
                     <div className="flex items-center gap-2">
                       <Tag className="h-4 w-4 text-[#4a5d4e]" />
                       <span className="text-sm font-medium text-[#141f36]">{appliedCoupon.code}</span>
-                      <span className="text-xs text-[#141f36]/60">-{appliedCoupon.discount}%</span>
+                      <span className="text-xs text-[#141f36]/60">-{appliedCoupon.percent}%</span>
                     </div>
                     <button onClick={handleRemoveCoupon} className="text-xs text-[#991b1b]/70 hover:text-[#991b1b]">
                       Quitar
@@ -247,7 +281,14 @@ export default function CartPage() {
 
                 {appliedCoupon && (
                   <div className="flex justify-between text-sm text-[#4a5d4e] font-medium">
-                    <span>Descuento ({appliedCoupon.discount}%)</span>
+                    <span>
+                      Descuento ({appliedCoupon.percent}%)
+                      {appliedCoupon.appliesTo && (
+                        <span className="block text-[10px] font-normal text-[#141f36]/50">
+                          Sobre decants de {appliedCoupon.appliesTo}
+                        </span>
+                      )}
+                    </span>
                     <span>-${discountAmount.toLocaleString("es-AR")}</span>
                   </div>
                 )}
@@ -275,7 +316,12 @@ export default function CartPage() {
               </div>
 
               <Button asChild size="lg" className="w-full h-14 text-base mb-3 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-none border-none shadow-lg transition-colors">
-                <a href={generarEnlaceWhatsApp()} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={generarEnlaceWhatsApp()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => appliedCoupon && discountAmount > 0 && marcarCuponUsado(appliedCoupon.code)}
+                >
                   <MessageCircle className="h-5 w-5 mr-2" />
                   Enviar Pedido por WhatsApp
                 </a>
