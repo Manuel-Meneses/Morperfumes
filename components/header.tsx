@@ -7,7 +7,8 @@ import { useCart } from "./cart-provider"
 import { Button } from "./ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet"
 import { useState, useEffect } from "react"
-import { CartDrawer } from "./cart-drawer" 
+import { CartDrawer } from "./cart-drawer"
+import { SearchCommand } from "./search-command"
 
 // 1. IMPORTAMOS EL TICKER ACÁ ADENTRO
 import { ShippingTicker } from "./shipping-ticker" 
@@ -91,7 +92,7 @@ export function Header() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-5 lg:gap-8">
             <Link href="/shop" className="text-lg font-serif text-[#141f36] hover:text-[#c0a062] transition-colors duration-300">
               Catálogo
             </Link>
@@ -110,8 +111,12 @@ export function Header() {
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-4 text-[#141f36]">
-            
+          <div className="ml-3 flex min-w-0 flex-1 items-center justify-end gap-2 text-[#141f36] md:ml-5 md:flex-none md:gap-4">
+            {/* Barra de búsqueda: en celular ocupa el espacio libre entre el logo y el carrito; en tablet, donde los links llenan el navbar, queda solo la lupa */}
+            <div className="min-w-0 flex-1 md:w-10 md:flex-none lg:w-48 xl:w-[320px]">
+              <SearchCommand />
+            </div>
+
             {/* Botón de Carrito (Reacciona a la animación isAnimatingCart) */}
             <Button 
               variant="ghost" 

@@ -4,6 +4,14 @@ import Link from "next/link"
 import { getProducts, getCombos } from "@/lib/api"
 import { precioCuota } from "@/lib/utils"
 import { InteractiveComboCard } from "@/components/interactive-combo-card"
+import { HeroIndex, type HeroSlide } from "@/components/hero-index"
+import { PromoHero } from "@/components/promo-hero"
+import type { ClavoId } from "@/components/promo-clavos"
+
+// QUÉ HERO SE MUESTRA:
+// "promos" = las promociones del momento (components/promo-hero.tsx)
+// "indice" = el hero con el índice de secciones. Cuando terminen las promos, cambiá a "indice".
+const HERO_ACTIVO: "promos" | "indice" = "promos"
 import { Play, ShieldCheck, Truck, MessageSquare, ChevronDown, ArrowRight, MessageCircle, Package } from "lucide-react"
 import Image from "next/image"
 
@@ -72,6 +80,93 @@ export default async function Home() {
     })
   )
 
+  // PROMO GROW EXTRAIT: el link "Conocé Grow Extrait" va a su ficha si está en la planilla
+  const grow = allProducts.find(p => p.name.toLowerCase().includes("grow extrait"))
+  const growHref = grow ? `/product/${grow.id}` : "/shop?category=decants&q=Grow"
+
+  // PROMO CLAVOS: cada frasco lleva a su ficha; si cambia el nombre en la planilla, cae en la búsqueda
+  const CLAVOS: Record<ClavoId, string> = {
+    vulcan: "vulcan",
+    "gentleman-society": "gentleman society",
+    valhalla: "valhalla",
+    "bold-citrus": "bold citrus",
+    "rome-extradose": "rome extradose",
+  }
+  const clavoHrefs = Object.fromEntries(
+    Object.entries(CLAVOS).map(([id, nombre]) => {
+      // La promo es en decants: primero el decant en stock, y si no está, la ficha de encargo
+      const candidatos = allProducts.filter(p => p.name.toLowerCase().includes(nombre))
+      const p = candidatos.find(p => p.id.startsWith("stock-")) ?? candidatos[0]
+      return [id, p ? `/product/${p.id}` : `/shop?category=decants&q=${encodeURIComponent(nombre)}`]
+    }),
+  ) as Record<ClavoId, string>
+
+  // HERO ÍNDICE: cada slide es una puerta a una sección.
+  // Para cambiar una foto, reemplazá el archivo en /public/hero manteniendo el mismo nombre.
+  const heroSlides: HeroSlide[] = [
+    {
+      id: "catalogo",
+      label: "Catálogo",
+      short: "Catálogo",
+      title: ["Descubrí tu", "esencia"],
+      text: "Explorá el mundo de la alta perfumería a través de decants exclusivos o llevate el frasco original sellado.",
+      cta: "Explorar catálogo",
+      href: "/shop",
+      video: "/hero/esencia.mp4",
+      poster: "/hero/esencia-poster.jpg",
+      count: allProducts.length,
+      unit: "fragancias",
+    },
+    {
+      id: "arabes-raros",
+      label: "Árabes Raros",
+      short: "Árabes",
+      title: ["El Oriente", "en tu piel"],
+      text: "Perfumes que no te aparecen en el «para ti» de TikTok, sin el hype de otros, pero que vale la pena probar y explorar.",
+      cta: "Explorar árabes raros",
+      href: "/shop?category=decants",
+      image: "/hero/arabes-raros.jpg",
+      count: todosLosRaros.length,
+      unit: "fragancias",
+    },
+    {
+      id: "disenador",
+      label: "Diseñador",
+      short: "Diseñador",
+      title: ["Firma", "contemporánea"],
+      text: "Los clásicos de las grandes casas, originales y comprobables por su código de batch.",
+      cta: "Ver diseñador",
+      href: "/shop?category=sellados&designer=true",
+      image: "/hero/disenador.jpg",
+      count: allProducts.filter(p => p.category.includes("Diseñador")).length,
+      unit: "fragancias",
+    },
+    {
+      id: "combos",
+      label: "Combos",
+      short: "Combos",
+      title: ["El regalo", "perfecto"],
+      text: "Selecciones armadas, desde frascos sellados hasta decants, con un valor preferencial.",
+      cta: "Ver combos",
+      href: "/combos",
+      image: "/hero/combos.jpg",
+      count: allCombos.length,
+      unit: "combos",
+    },
+    {
+      id: "encargos",
+      label: "Encargos",
+      short: "Encargos",
+      title: ["Tu perfume,", "por encargo"],
+      text: "Elegís el frasco sellado, confirmás con una seña del 50% y te llega en 1 a 2 semanas.",
+      cta: "Ver encargos",
+      href: "/shop?category=sellados",
+      image: "/hero/encargos.jpg",
+      count: allProducts.filter(p => p.availability === "encargo").length,
+      unit: "fragancias",
+    },
+  ]
+
   const brands = [
     { name: "Lattafa", logo: "/logos/lattafa.svg" },
     { name: "Afnan", logo: "/logos/afnan.svg" },
@@ -124,41 +219,7 @@ export default async function Home() {
     <div className="min-h-screen bg-[#f6f4ed] relative pb-20 md:pb-0 font-sans selection:bg-[#c0a062] selection:text-[#141f36]"> 
       <Header />
 
-      <section className="relative h-[80vh] sm:h-[85vh] flex items-center justify-center bg-[#141f36] overflow-hidden">
-        <div className="absolute inset-0 w-full h-full bg-[#141f36]">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto -translate-x-1/2 -translate-y-1/2 object-cover opacity-40"
-          >
-            <source src="/perfume_video.mp4" type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-gradient-to-t from-[#141f36] via-transparent to-[#141f36]/50" />
-        </div>
-
-        <div className="relative z-10 text-center px-4 w-full max-w-4xl mx-auto mt-[-5vh]">
-          <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-medium mb-6 tracking-tight text-[#f6f4ed]">
-            Descubrí tu <span className="italic text-[#c0a062] font-light">esencia</span>
-          </h1>
-          <p className="text-lg sm:text-xl md:text-2xl mb-10 max-w-xl mx-auto text-[#f6f4ed]/90 font-serif leading-relaxed">
-            Explorá el mundo de la alta perfumería a través de decants exclusivos o llevate el frasco original sellado.
-          </p>
-          <div>
-            <Button asChild size="lg" className="group h-14 px-10 text-base uppercase tracking-[0.2em] bg-[#c0a062] hover:bg-[#f6f4ed] text-[#141f36] hover:text-[#141f36] rounded-none border-none transition-colors duration-300">
-              <Link href="/shop" className="flex items-center gap-3">
-                Explorar Catálogo
-                <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform duration-300" />
-              </Link>
-            </Button>
-          </div>
-        </div>
-
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center z-20 opacity-80">
-          <ChevronDown className="h-6 w-6 text-[#c0a062] animate-bounce" />
-        </div>
-      </section>
+      {HERO_ACTIVO === "promos" ? <PromoHero growHref={growHref} clavoHrefs={clavoHrefs} /> : <HeroIndex slides={heroSlides} />}
 
       <div className="bg-[#141f36] border-y border-[#c0a062]/20 py-6 relative z-20">
         <div className="container mx-auto px-4">

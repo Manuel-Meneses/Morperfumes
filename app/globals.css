@@ -2,6 +2,8 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+/* Pantalla ancha de verdad (no una tablet parada): la promo clavos se arma como el póster */
+@custom-variant wide (@media (min-width: 1024px) and (min-aspect-ratio: 5/4));
 
 :root {
   /* Identidad Mor Perfumes - Modo Claro (Base Crema) */
@@ -189,5 +191,303 @@
 
   .animate-shake {
     animation: shake 0.5s ease-in-out;
+  }
+
+  /* Hero índice: títulos que suben, textos que aparecen y línea de progreso dorada */
+  @keyframes hero-rise {
+    from {
+      transform: translateY(105%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes hero-fade {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes hero-progress {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  .hero-rise {
+    animation: hero-rise 1100ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .hero-fade {
+    animation: hero-fade 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .hero-progress {
+    animation-name: hero-progress;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    transform-origin: left;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-rise,
+    .hero-fade {
+      animation: none;
+    }
+  }
+
+  /* Promos del hero: entrada cinematográfica, frasco flotando, sello y sol */
+  /* Sin filter: blur(): animar un desenfoque obliga a Chrome a recalcularlo en cada cuadro */
+  @keyframes promo-rise {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 70px, 0) scale(0.94);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes promo-dune {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 50px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes promo-float {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0);
+    }
+    50% {
+      transform: translate3d(0, -14px, 0);
+    }
+  }
+
+  @keyframes promo-shadow {
+    0%,
+    100% {
+      transform: translateX(-50%) scale(1);
+      opacity: 0.9;
+    }
+    50% {
+      transform: translateX(-50%) scale(0.8);
+      opacity: 0.55;
+    }
+  }
+
+  @keyframes promo-sun {
+    0%,
+    100% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 0.85;
+    }
+    50% {
+      transform: translate(-50%, -50%) scale(1.08);
+      opacity: 1;
+    }
+  }
+
+  @keyframes promo-pop {
+    from {
+      opacity: 0;
+      transform: scale(0.4) rotate(-50deg);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes promo-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes promo-wipe {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  .promo-rise {
+    animation: promo-rise 1600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .promo-dune {
+    animation: promo-dune 1500ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .promo-float {
+    animation: promo-float 6s ease-in-out infinite;
+  }
+
+  .promo-shadow {
+    animation: promo-shadow 6s ease-in-out infinite;
+  }
+
+  .promo-sun {
+    animation: promo-sun 9s ease-in-out infinite;
+  }
+
+  .promo-pop {
+    animation: promo-pop 1100ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .promo-spin {
+    animation: promo-spin 26s linear infinite;
+  }
+
+  .promo-wipe {
+    animation: promo-wipe 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes promo-mark {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  .promo-mark {
+    animation: promo-mark 1000ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    transform-origin: left;
+  }
+
+  /* Promo clavos (póster del taller). Geometría de la foto 1536 × 1024 dentro del hero:
+     --sw/--sh = ancho/alto de la foto, --st = su top, --u = 1px del póster.
+     En celular la foto ocupa el ancho de los frascos y va abajo; en pantallas anchas cubre el hero
+     recortando como mucho un 8% de alto (si sobra ancho se ve la oscuridad extendida de la foto). */
+  .clavo-escena {
+    --sw: 125cqw;
+    --sh: calc(var(--sw) / 1.5);
+    --st: calc(100cqh - 46px - var(--sh));
+  }
+
+  @media (min-width: 1024px) and (min-aspect-ratio: 5/4) {
+    .clavo-escena {
+      --sh: min(max(100cqh, 66.667cqw), 108cqh);
+      --sw: calc(var(--sh) * 1.5);
+      --st: calc((100cqh - var(--sh)) * 0.3);
+      --u: calc(var(--sw) / 1536);
+    }
+  }
+
+  /* La lámpara se prende: el taller pasa de negro a iluminado con un solo parpadeo suave */
+  @keyframes clavo-lights {
+    0% {
+      opacity: 0.96;
+    }
+    24% {
+      opacity: 0.45;
+    }
+    32% {
+      opacity: 0.7;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes clavo-push {
+    from {
+      transform: scale(1.07);
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  @keyframes clavo-beam {
+    0%,
+    100% {
+      opacity: 0.6;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes clavo-dust {
+    0% {
+      transform: translate3d(0, 0, 0);
+      opacity: 0;
+    }
+    20%,
+    75% {
+      opacity: var(--o, 0.45);
+    }
+    100% {
+      transform: translate3d(var(--dx, -24px), var(--dy, 50px), 0);
+      opacity: 0;
+    }
+  }
+
+  .clavo-lights {
+    animation: clavo-lights 1800ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+
+  .clavo-push {
+    animation: clavo-push 2800ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    transform-origin: 50% 62%;
+  }
+
+  .clavo-beam {
+    animation: clavo-beam 7s ease-in-out infinite;
+  }
+
+  .clavo-dust {
+    animation: clavo-dust var(--dur, 12s) linear infinite both;
+  }
+
+  /* La slide del hero que no se ve congela todas sus animaciones */
+  .promo-paused,
+  .promo-paused * {
+    animation-play-state: paused !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .clavo-push,
+    .clavo-beam {
+      animation: none;
+    }
+
+    .clavo-lights,
+    .clavo-dust {
+      display: none;
+    }
+
+    .promo-rise,
+    .promo-dune,
+    .promo-float,
+    .promo-shadow,
+    .promo-sun,
+    .promo-pop,
+    .promo-spin,
+    .promo-wipe,
+    .promo-mark {
+      animation: none;
+    }
   }
 }

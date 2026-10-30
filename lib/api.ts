@@ -16,6 +16,10 @@ export interface Product {
   availability: "encargo" | "stock"
   isFeatured?: boolean
   isFeaturedRaro?: boolean
+  // Datos extra para el buscador del navbar (no se muestran en la ficha)
+  brand?: string
+  olfactoryNotes?: string
+  idealFor?: string
 }
 
 export interface Combo {
@@ -99,6 +103,8 @@ async function fetchEncargoSheet(url: string, category: string): Promise<Product
 
               const idxFrase = findCol(["FRASE", "FRASE CORTA"])
               const fraseCorta = (idxFrase !== -1 && row[idxFrase]) ? row[idxFrase].trim() : ""
+              const idxNotas = findCol(["NOTAS OLFATIVAS"])
+              const notasOlfativas = (idxNotas !== -1 && row[idxNotas]) ? row[idxNotas].trim() : ""
               const idxDesc = findCol(["DESCRIPCION", "DESCRIPCIÓN", "DESCRIPTION"])
              const descPersonal = (idxDesc !== -1 && row[idxDesc]) ? row[idxDesc].trim() : `Descubrí la esencia de ${rawName}. Fragancia premium disponible por encargo.`
               
@@ -114,6 +120,7 @@ async function fetchEncargoSheet(url: string, category: string): Promise<Product
                 category: category, // Ej: "Árabes" o "Diseñador" (Lo que ve el cliente)
                 webCategory: "sellados", // SOLUCIÓN: Todos los de este Excel van forzados a la pestaña "Sellados"
                 notes: fraseCorta,
+                olfactoryNotes: notasOlfativas,
                 availability: "encargo",
                 description: descPersonal,
                 details: dynamicDetails, 
@@ -193,6 +200,9 @@ async function fetchStockSheet(url: string): Promise<Product[]> {
                 sizePrices: sizePrices, 
                 isFeatured: row["Destacado"]?.toString().trim().toUpperCase() === "SI",
                 isFeaturedRaro: row["Destacado Raro"]?.toString().trim().toUpperCase() === "SI", // <--- AGREGAR ESTA NUEVA
+                brand: row["Marca"] || "",
+                olfactoryNotes: [row["Salida"], row["Corazón"], row["Fondo"]].filter(Boolean).join(" • "),
+                idealFor: row["Ideal para"] || "",
               }
             })
           resolve(products)
