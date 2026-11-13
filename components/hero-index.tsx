@@ -201,10 +201,7 @@ export function HeroIndex({ slides }: { slides: HeroSlide[] }) {
       {/* VELOS: marino desde abajo en mobile; desde la izquierda y abajo en desktop */}
       <div className="pointer-events-none absolute inset-0 z-[3] bg-[linear-gradient(0deg,rgba(20,31,54,0.97)_0%,rgba(20,31,54,0.78)_42%,rgba(20,31,54,0.3)_100%)] lg:bg-[linear-gradient(90deg,rgba(20,31,54,0.92)_0%,rgba(20,31,54,0.62)_48%,rgba(20,31,54,0.4)_100%)]" />
       <div className="pointer-events-none absolute inset-0 z-[3] hidden bg-[linear-gradient(0deg,rgba(20,31,54,0.9)_0%,rgba(20,31,54,0)_60%)] lg:block" />
-      <div
-        className="pointer-events-none absolute inset-0 z-[4] opacity-[0.09] mix-blend-overlay"
-        style={{ backgroundImage: GRAIN }}
-      />
+ 
 
       {pauseButton("absolute right-3 top-3 z-20 lg:hidden")}
 
