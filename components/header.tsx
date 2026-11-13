@@ -91,10 +91,13 @@ export function Header() {
             />
           </Link>
 
-          {/* Desktop Navigation */}
+         {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-5 lg:gap-8">
-            <Link href="/shop" className="text-lg font-serif text-[#141f36] hover:text-[#c0a062] transition-colors duration-300">
-              Catálogo
+            <Link href="/shop?category=sellados" className="text-lg font-serif text-[#141f36] hover:text-[#c0a062] transition-colors duration-300">
+              Sellados
+            </Link>
+            <Link href="/shop?category=decants" className="text-lg font-serif text-[#141f36] hover:text-[#c0a062] transition-colors duration-300">
+              Decants
             </Link>
             <Link href="/combos" className="text-lg font-serif text-[#141f36] hover:text-[#c0a062] transition-colors duration-300">
               Combos
@@ -105,10 +108,7 @@ export function Header() {
             <Link href="/about" className="text-lg font-serif text-[#141f36] hover:text-[#c0a062] transition-colors duration-300">
               Nuestra Historia
             </Link>
-            <Link href="/faq" className="text-lg font-serif text-[#141f36] hover:text-[#c0a062] transition-colors duration-300">
-              Preguntas Frecuentes
-            </Link>
-          </nav>
+          </nav> 
 
           {/* Actions */}
           <div className="ml-3 flex min-w-0 flex-1 items-center justify-end gap-2 text-[#141f36] md:ml-5 md:flex-none md:gap-4">
@@ -161,9 +161,12 @@ export function Header() {
                     />
                   </div>
 
-                  <nav className="flex flex-col gap-0">
-                    <Link href="/shop" onClick={() => setOpen(false)} className="text-xl font-serif py-5 px-4 border-b border-[#141f36]/10 hover:bg-[#141f36]/5 hover:text-[#c0a062] transition-colors">
-                      Catálogo
+                 <nav className="flex flex-col gap-0">
+                    <Link href="/shop?category=sellados" onClick={() => setOpen(false)} className="text-xl font-serif py-5 px-4 border-b border-[#141f36]/10 hover:bg-[#141f36]/5 hover:text-[#c0a062] transition-colors">
+                      Sellados
+                    </Link>
+                    <Link href="/shop?category=decants" onClick={() => setOpen(false)} className="text-xl font-serif py-5 px-4 border-b border-[#141f36]/10 hover:bg-[#141f36]/5 hover:text-[#c0a062] transition-colors">
+                      Decants
                     </Link>
                     <Link href="/combos" onClick={() => setOpen(false)} className="text-xl font-serif py-5 px-4 border-b border-[#141f36]/10 hover:bg-[#141f36]/5 hover:text-[#c0a062] transition-colors">
                       Combos 
@@ -173,9 +176,6 @@ export function Header() {
                     </Link>
                     <Link href="/about" onClick={() => setOpen(false)} className="text-xl font-serif py-5 px-4 border-b border-[#141f36]/10 hover:bg-[#141f36]/5 hover:text-[#c0a062] transition-colors">
                       Nuestra Historia
-                    </Link>
-                    <Link href="/faq" onClick={() => setOpen(false)} className="text-xl font-serif py-5 px-4 border-b border-[#141f36]/10 hover:bg-[#141f36]/5 hover:text-[#c0a062] transition-colors">
-                      Preguntas Frecuentes
                     </Link>
                     
                     <button
@@ -192,7 +192,7 @@ export function Header() {
                         </span>
                       )}
                     </button>
-                  </nav>
+                  </nav> 
                 </div>
               </SheetContent>
             </Sheet>

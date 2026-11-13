@@ -11,7 +11,7 @@ import type { ClavoId } from "@/components/promo-clavos"
 // QUÉ HERO SE MUESTRA:
 // "promos" = las promociones del momento (components/promo-hero.tsx)
 // "indice" = el hero con el índice de secciones. Cuando terminen las promos, cambiá a "indice".
-const HERO_ACTIVO: "promos" | "indice" = "promos"
+const HERO_ACTIVO: "promos" | "indice" = "indice"
 import { Play, ShieldCheck, Truck, MessageSquare, ChevronDown, ArrowRight, MessageCircle, Package } from "lucide-react"
 import Image from "next/image"
 
@@ -218,6 +218,36 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-[#f6f4ed] relative pb-20 md:pb-0 font-sans selection:bg-[#c0a062] selection:text-[#141f36]"> 
       <Header />
+
+      {/* BANNER DE COMPRA RÁPIDA (NUEVO) */}
+      <div className="relative bg-[#141f36] border-b border-[#c0a062]/20 py-6 sm:py-8 z-20 overflow-hidden">
+        {/* Resplandor sutil de fondo para dar profundidad */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(192,160,98,0.12)_0%,_transparent_100%)] pointer-events-none" />
+        
+        <div className="container mx-auto px-4 relative z-10 flex flex-col sm:flex-row items-center justify-center gap-5 sm:gap-12">
+          
+          <div className="flex flex-col items-center sm:items-end text-center sm:text-right">
+            <span className="text-[#c0a062] font-bold tracking-[0.3em] uppercase text-[10px] mb-1.5">
+              Acceso Directo
+            </span>
+            <h2 className="font-serif text-3xl sm:text-4xl font-medium text-[#f6f4ed] tracking-wide drop-shadow-md">
+              Comprá Acá
+            </h2>
+          </div>
+          
+          {/* Separador vertical elegante (solo visible en pantallas grandes) */}
+          <div className="hidden sm:block w-px h-16 bg-gradient-to-b from-transparent via-[#c0a062]/50 to-transparent" />
+          
+          {/* Botón CTA - Sigue el estilo exacto del HeroIndex (Fondo dorado, hover crema) */}
+          <Link 
+            href="/shop" 
+            className="group flex items-center justify-center gap-3 bg-[#c0a062] hover:bg-[#f6f4ed] text-[#141f36] font-bold text-xs sm:text-sm py-4 px-10 transition-all duration-300 uppercase tracking-[0.2em] shadow-[0_0_15px_rgba(192,160,98,0.2)] hover:shadow-[0_0_25px_rgba(246,244,237,0.4)]"
+          >
+            Ingresar a la Tienda
+            <ArrowRight className="w-4 h-4 transform transition-transform duration-300 group-hover:translate-x-1" />
+          </Link>
+        </div>
+      </div>
 
       {HERO_ACTIVO === "promos" ? <PromoHero growHref={growHref} clavoHrefs={clavoHrefs} /> : <HeroIndex slides={heroSlides} />}
 
