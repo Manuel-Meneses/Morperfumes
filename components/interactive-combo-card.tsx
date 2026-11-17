@@ -37,7 +37,8 @@ export function InteractiveComboCard({ combo }: { combo: any }) {
     if (isSuperCombo) {
       const initial: Record<number, string> = {}
       combo.customSlots.forEach((slot: any, i: number) => {
-        initial[i] = slot.options[0].name 
+        const first = slot?.options?.[0]?.name
+        if (first) initial[i] = first
       })
       setSelections(initial)
     }
@@ -45,8 +46,8 @@ export function InteractiveComboCard({ combo }: { combo: any }) {
 
   const displayImages = isSuperCombo 
     ? combo.customSlots.map((slot: any, idx: number) => {
-        const selectedOptName = selections[idx] || slot.options[0]?.name;
-        const optData = slot.options.find((o: any) => o.name === selectedOptName);
+        const selectedOptName = selections[idx] || slot?.options?.[0]?.name;
+        const optData = (slot?.options ?? []).find((o: any) => o.name === selectedOptName);
         return optData?.image || "/placeholder.svg";
       }).slice(0, 3)
     : combo.images;
@@ -297,7 +298,7 @@ export function InteractiveComboCard({ combo }: { combo: any }) {
                              <Plus className="w-3 h-3" /> {slot.title}
                            </p>
                            <div className="flex flex-col gap-2">
-                             {slot.options.map((opt: any) => {
+                             {(slot?.options ?? []).map((opt: any) => {
                                const isSelected = selections[idx] === opt.name;
                                return (
                                  <button

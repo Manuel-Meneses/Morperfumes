@@ -35,7 +35,7 @@ export function ProductCard({ product }: { product: Product }) {
           alt={product.name}
           fill
           // ACÁ ESTÁ LA MAGIA: object-contain + drop-shadow + p-6 para que respire
-          className="object-contain transition-transform duration-700 group-hover:scale-105 p-6 drop-shadow-[0_15px_15px_rgba(0,0,0,0.12)]"
+          className="object-contain transition-transform duration-700 group-hover:scale-105 p-2 drop-shadow-[0_15px_15px_rgba(0,0,0,0.12)]"
         />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500" />
       </Link>

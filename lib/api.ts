@@ -41,6 +41,12 @@ const URL_ARABES_ENCARGO = `https://docs.google.com/spreadsheets/d/${SHEET_ID_EN
 const URL_DISENADOR_ENCARGO = `https://docs.google.com/spreadsheets/d/${SHEET_ID_ENCARGO}/gviz/tq?tqx=out:csv&sheet=Diseñador`
 const URL_STOCK_DECANTS = `https://docs.google.com/spreadsheets/d/${SHEET_ID_STOCK}/gviz/tq?tqx=out:csv&sheet=Untitled` 
 
+// Pasa la foto por /api/img, que recorta los márgenes y la centra en un lienzo
+// uniforme, así todos los frascos se ven del mismo tamaño en la tienda.
+function fotoNormalizada(url: string): string {
+  return `/api/img?url=${encodeURIComponent(url.trim())}`
+}
+
 async function fetchEncargoSheet(url: string, category: string): Promise<Product[]> {
   try {
     const response = await fetch(url, { cache: 'no-store' })
@@ -77,7 +83,7 @@ async function fetchEncargoSheet(url: string, category: string): Promise<Product
           const products: Product[] = dataRows
             .filter(row => idxPerfume !== -1 && row[idxPerfume] && row[idxPerfume].trim() !== "")
             .map((row, index) => {
-              const imageStr = (idxFoto !== -1 && row[idxFoto] && row[idxFoto].includes("http")) ? row[idxFoto].trim() : "/placeholder.svg"
+              const imageStr = (idxFoto !== -1 && row[idxFoto] && row[idxFoto].includes("http")) ? fotoNormalizada(row[idxFoto]) : "/placeholder.svg"
               const rawName = row[idxPerfume].trim()
               let genero = ""
               if (finalIdxGenero !== idxPerfume && row[finalIdxGenero]) genero = row[finalIdxGenero].trim()
@@ -153,7 +159,7 @@ async function fetchStockSheet(url: string): Promise<Product[]> {
           const products: Product[] = rows
             .filter(row => row["Nombre"]) 
             .map((row, index) => {
-              const imageStr = row["Foto"] && row["Foto"].includes("http") ? row["Foto"] : "/placeholder.svg"
+              const imageStr = row["Foto"] && row["Foto"].includes("http") ? fotoNormalizada(row["Foto"]) : "/placeholder.svg"
               
               // LECTURA DE LOS 3 TAMAÑOS
               const p3 = Number(row["Precio 3ml"]?.toString().replace(/[^0-9.-]+/g,"")) || 0
@@ -297,7 +303,9 @@ export async function getCombos(): Promise<any[]> {
             title: title ? title.trim() : "Elegí una opción",
             options: optionsWithImages
           };
-        });
+        }).filter((slot: any) => slot.options.length > 0); // un slot sin opciones rompe la tarjeta
+
+        if (parsedCustomSlots.length === 0) parsedCustomSlots = undefined;
       }
 
       // BUSCADOR DE FOTOS PARA LA PORTADA
@@ -325,6 +333,11 @@ export async function getCombos(): Promise<any[]> {
         images: fotosExtraidas.length > 0 ? fotosExtraidas : [],
         customSlots: parsedCustomSlots 
       }
+    }).filter((combo: any) => {
+      // Si la planilla tiene columnas corridas o le falta el precio, no publicamos el combo (evita venderlo a $0)
+      const valido = combo.price5ml > 0;
+      if (!valido) console.warn(`Combo "${combo.id}" (${combo.name}) omitido: sin precio válido en la planilla`);
+      return valido;
     });
 
   } catch (error) {
