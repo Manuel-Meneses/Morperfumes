@@ -655,7 +655,7 @@ export default async function Home() {
                   <Link href="/shop?category=decants" className="hover:text-[#c0a062] transition-colors block py-1 md:py-0">Decants</Link>
                 </li>
                 <li className="transform transition-all duration-300 md:hover:-translate-x-2">
-                  <Link href="/shop?category=sellados" className="hover:text-[#c0a062] transition-colors block py-1 md:py-0">Sellados</Link>
+                  <Link href="/shop?category=sellados" className="hover:text-[#c0a062] transition-colors block py-1 md:py-0">Perfumes Enteros</Link>
                 </li>
               </ul>
             </div>

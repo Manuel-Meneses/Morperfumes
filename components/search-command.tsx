@@ -39,7 +39,7 @@ interface Result {
 
 const FORMAT_CHIPS: { id: Format; label: string }[] = [
   { id: "decant", label: "Decants" },
-  { id: "sellado", label: "Sellados" },
+  { id: "sellado", label: "Perfumes Enteros" },
 ]
 const SEGMENT_CHIPS: { id: Segment; label: string }[] = [
   { id: "arabes", label: "Árabes" },

@@ -1,11 +1,12 @@
 "use client"
 
-import type React from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { MessageCircle, Star } from "lucide-react"
+import { ShoppingBag } from "lucide-react"
 import { Button } from "./ui/button"
 import { precioCuota } from "@/lib/utils"
+import { useCart } from "./cart-provider"
+import { useToast } from "@/hooks/use-toast"
 
 export interface Product {
   id: string
@@ -14,68 +15,77 @@ export interface Product {
   image: string
   category: string
   notes?: string
+  sizes?: string[]
+  sizePrices?: Record<string, number>
 }
 
-export function ProductCard({ product }: { product: Product }) {
-  // Número de León e Indio (extraído del brief)
-  const numeroWA = "5493516087006"
-  
-  // Armamos el mensaje específico para este producto
-  const mensajeWA = `¡Hola León e Indio! Me interesa el perfume ${product.name}.\n\nEspecificaciones:\n- Precio efectivo/transferencia: $${product.price.toLocaleString("es-AR")}\n- Con tarjeta: 3 cuotas de $${precioCuota(product.price).toLocaleString("es-AR")}\n- Notas: ${product.notes}\n\n¿Tienen stock disponible para encargar?`
-  const linkWA = `https://wa.me/${numeroWA}?text=${encodeURIComponent(mensajeWA)}`
-  
-  // Link para el rating (busca el nombre del perfume en Fragrantica)
-  const linkRating = `https://www.fragrantica.es/buscar/?q=${encodeURIComponent(product.name)}`
+export function ProductCard({ product, returnUrl }: { product: Product; returnUrl?: string }) {
+  const { addItem } = useCart()
+  const { toast } = useToast()
+
+  const href = returnUrl ? `/product/${product.id}?from=${returnUrl}` : `/product/${product.id}`
+
+  // "Comprar" agrega directo al carrito el primer formato disponible
+  // (en sellados es "Frasco Sellado"; en decants, el tamaño más chico).
+  const handleBuy = () => {
+    const size = product.sizes?.[0] ?? "Frasco Sellado"
+    const price = product.sizePrices?.[size] ?? product.price
+    addItem({ id: product.id, name: product.name, price, image: product.image, size })
+    toast({
+      title: "Agregado a tu selección",
+      description: `${product.name} (${size}) ya está en tu carrito.`,
+    })
+  }
 
   return (
     <div className="group relative border border-border bg-card rounded-sm overflow-hidden flex flex-col h-full hover:shadow-md transition-shadow duration-300">
-      <Link href={`/product/${product.id}`} className="block relative aspect-[3/4] bg-[#f6f4ed] flex items-center justify-center overflow-hidden">
+      <Link href={href} className="block relative aspect-[3/4] bg-[#f6f4ed] flex items-center justify-center overflow-hidden">
         <Image
           src={product.image || "/placeholder.svg"}
           alt={product.name}
           fill
-          // ACÁ ESTÁ LA MAGIA: object-contain + drop-shadow + p-6 para que respire
+          sizes="(min-width: 1280px) 20vw, (min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
           className="object-contain transition-transform duration-700 group-hover:scale-105 p-2 drop-shadow-[0_15px_15px_rgba(0,0,0,0.12)]"
         />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500" />
       </Link>
-      
-      <div className="p-4 flex flex-col flex-grow text-center">
-        <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium mb-1">
+
+      <div className="p-2.5 sm:p-3 flex flex-col flex-grow text-center">
+        <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-widest font-medium mb-1 truncate">
           {product.category}
         </p>
-        <h3 className="font-serif text-lg font-medium text-foreground leading-tight mb-2">
-          {product.name}
-        </h3>
-        
+        <Link href={href}>
+          <h3 className="font-serif text-sm sm:text-base font-medium text-foreground leading-tight mb-1.5 line-clamp-2">
+            {product.name}
+          </h3>
+        </Link>
+
         {product.notes && (
-          <p className="text-xs italic text-muted-foreground line-clamp-3 mb-3">
+          <p className="hidden sm:block text-[11px] italic text-muted-foreground line-clamp-2 mb-2">
             {product.notes}
           </p>
         )}
-        
-        <div className="mt-auto mb-4">
-          <p className="text-base font-semibold text-foreground leading-tight">
+
+        <div className="mt-auto mb-3">
+          <p className="text-sm sm:text-base font-semibold text-foreground leading-tight">
             ${product.price.toLocaleString("es-AR")}
-            <span className="text-[10px] font-normal text-muted-foreground ml-1 align-middle">
+            <span className="block sm:inline text-[9px] sm:text-[10px] font-normal text-muted-foreground sm:ml-1 align-middle">
               efectivo / transf.
             </span>
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-[10px] sm:text-xs text-muted-foreground">
             o 3 cuotas de ${precioCuota(product.price).toLocaleString("es-AR")}
           </p>
         </div>
 
-        <div className="flex flex-col gap-2 mt-auto">
-          {/* Botón de Rating */}
-          <Button asChild variant="outline" size="sm" className="w-full text-xs h-9">
-            <a href={linkRating} target="_blank" rel="noopener noreferrer">
-              <Star className="h-3 w-3 mr-2 fill-current" />
-              Ver Rating
-            </a>
-          </Button>
-          
-        </div>
+        <Button
+          onClick={handleBuy}
+          size="sm"
+          className="w-full h-9 text-[11px] sm:text-xs font-bold uppercase tracking-widest rounded-sm bg-[#c0a062] text-[#141f36] hover:bg-[#141f36] hover:text-[#f6f4ed] transition-colors"
+        >
+          <ShoppingBag className="h-3.5 w-3.5 mr-1.5" />
+          Comprar
+        </Button>
       </div>
     </div>
   )

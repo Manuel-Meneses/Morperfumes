@@ -9,7 +9,7 @@ import Link from "next/link"
 import { SlidersHorizontal, Search, DollarSign, ChevronDown, ChevronLeft, ChevronRight, Filter, Users } from "lucide-react"
 import { getProducts, Product } from "@/lib/api"
 
-const ITEMS_PER_PAGE = 12
+const ITEMS_PER_PAGE = 20
 
 // CACHÉ EN MEMORIA: Evita la pantalla de carga al volver atrás
 let cachedProducts: Product[] | null = null;
@@ -212,7 +212,7 @@ function ShopContent() {
   )
 
   const tabs = [
-    { id: "sellados", label: "Sellados", subtitle: "Árabes & Diseñador" },
+    { id: "sellados", label: "Perfumes Enteros", subtitle: "Árabes & Diseñador" },
     { id: "decants", label: "Decants", subtitle: "Raros & Fraccionados" },
   ]
 
@@ -253,7 +253,7 @@ function ShopContent() {
                   categoryParam === tab.id ? "opacity-100" : "opacity-40 hover:opacity-70"
                 }`}
               >
-                <span className={`font-serif text-xl sm:text-2xl md:text-4xl mb-1 md:mb-2 ${categoryParam === tab.id ? "text-[#141f36]" : "text-[#141f36]"}`}>
+                <span className={`font-serif text-lg sm:text-2xl md:text-4xl leading-tight text-center mb-1 md:mb-2 ${categoryParam === tab.id ? "text-[#141f36]" : "text-[#141f36]"}`}>
                   {tab.label}
                 </span>
                 <span className={`text-[7px] sm:text-[9px] md:text-xs uppercase tracking-[0.05em] sm:tracking-[0.1em] md:tracking-[0.2em] font-bold text-center ${categoryParam === tab.id ? "text-[#c0a062]" : "text-[#141f36]"}`}>

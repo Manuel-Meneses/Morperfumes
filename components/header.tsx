@@ -94,7 +94,7 @@ export function Header() {
          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-5 lg:gap-8">
             <Link href="/shop?category=sellados" className="text-lg font-serif text-[#141f36] hover:text-[#c0a062] transition-colors duration-300">
-              Sellados
+              Perfumes Enteros
             </Link>
             <Link href="/shop?category=decants" className="text-lg font-serif text-[#141f36] hover:text-[#c0a062] transition-colors duration-300">
               Decants
@@ -163,7 +163,7 @@ export function Header() {
 
                  <nav className="flex flex-col gap-0">
                     <Link href="/shop?category=sellados" onClick={() => setOpen(false)} className="text-xl font-serif py-5 px-4 border-b border-[#141f36]/10 hover:bg-[#141f36]/5 hover:text-[#c0a062] transition-colors">
-                      Sellados
+                      Perfumes Enteros
                     </Link>
                     <Link href="/shop?category=decants" onClick={() => setOpen(false)} className="text-xl font-serif py-5 px-4 border-b border-[#141f36]/10 hover:bg-[#141f36]/5 hover:text-[#c0a062] transition-colors">
                       Decants
