@@ -49,7 +49,7 @@ function fotoNormalizada(url: string): string {
 
 async function fetchEncargoSheet(url: string, category: string): Promise<Product[]> {
   try {
-    const response = await fetch(url, { next: { revalidate: 300 } })
+    const response = await fetch(url, { cache: 'no-store' })
     const csvText = await response.text()
     if (csvText.includes("<!DOCTYPE html>")) return []
 
@@ -144,7 +144,7 @@ async function fetchEncargoSheet(url: string, category: string): Promise<Product
 
 async function fetchStockSheet(url: string): Promise<Product[]> {
   try {
-    const response = await fetch(url, { next: { revalidate: 300 } })
+    const response = await fetch(url, { cache: 'no-store' })
     const csvText = await response.text()
     if (csvText.includes("<!DOCTYPE html>")) return []
 
