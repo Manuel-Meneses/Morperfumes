@@ -41,15 +41,15 @@ const URL_ARABES_ENCARGO = `https://docs.google.com/spreadsheets/d/${SHEET_ID_EN
 const URL_DISENADOR_ENCARGO = `https://docs.google.com/spreadsheets/d/${SHEET_ID_ENCARGO}/gviz/tq?tqx=out:csv&sheet=Diseñador`
 const URL_STOCK_DECANTS = `https://docs.google.com/spreadsheets/d/${SHEET_ID_STOCK}/gviz/tq?tqx=out:csv&sheet=Untitled` 
 
-// Pasa la foto por /api/img, que recorta los márgenes y la centra en un lienzo
-// uniforme, así todos los frascos se ven del mismo tamaño en la tienda.
+// Usamos la URL original de la foto (sin procesar en el servidor) para no
+// consumir CPU en Vercel. El centrado lo resuelve el CSS con object-contain.
 function fotoNormalizada(url: string): string {
-  return `/api/img?url=${encodeURIComponent(url.trim())}`
+  return url.trim()
 }
 
 async function fetchEncargoSheet(url: string, category: string): Promise<Product[]> {
   try {
-    const response = await fetch(url, { cache: 'no-store' })
+    const response = await fetch(url, { next: { revalidate: 300 } })
     const csvText = await response.text()
     if (csvText.includes("<!DOCTYPE html>")) return []
 
@@ -144,7 +144,7 @@ async function fetchEncargoSheet(url: string, category: string): Promise<Product
 
 async function fetchStockSheet(url: string): Promise<Product[]> {
   try {
-    const response = await fetch(url, { cache: 'no-store' })
+    const response = await fetch(url, { next: { revalidate: 300 } })
     const csvText = await response.text()
     if (csvText.includes("<!DOCTYPE html>")) return []
 
